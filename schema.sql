@@ -25,7 +25,7 @@ CREATE TABLE products (
     labor_hours REAL NOT NULL CHECK(labor_hours >= 0),
     sale_price REAL CHECK(sale_price >= 0)
 );
-CREATE TABLE users (
+CREATE TABLE bom_items (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),
     component_id INTEGER NOT NULL REFERENCES components(id),
