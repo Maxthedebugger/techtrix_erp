@@ -18,3 +18,16 @@ components (
     price REAL CHECK (price >= 0),
     supplier TEXT
 );
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    labor_hours REAL NOT NULL CHECK(labor_hours >= 0),
+    sale_price REAL CHECK(sale_price >= 0)
+);
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    component_id INTEGER NOT NULL REFERENCES components(id),
+    quantity INTEGER NOT NULL CHECK (quantity > 0)
+);
