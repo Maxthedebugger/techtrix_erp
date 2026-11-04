@@ -31,3 +31,25 @@ CREATE TABLE bom_items (
     component_id INTEGER NOT NULL REFERENCES components(id),
     quantity INTEGER NOT NULL CHECK (quantity > 0)
 );
+CREATE TABLE orders (
+    id INTEGER PRIMARY KEY,
+    customer TEXT NOT NULL,
+    product_id REFERENCES products(id) NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity  > 0),
+    due_date TEXT,
+    status TEXT NOT NULL DEFAULT new CHECK(status IN('new','in_production','done')),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE stock_movements (
+    id INTEGER PRIMARY KEY,
+    component_id REFERENCES components(id) NOT NULL, 
+    change INTEGER NOT NULL CHECK (change >= 0),
+    reason TEXT NOT NULL CHECK(reason IN ('delivery', 'production', 'correction')),
+    order_id REFERENCES orders(id) 
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE settings (
+    key TEXT PRIMARY KEY,
+    value REAL NOT NULL
+    
+);
