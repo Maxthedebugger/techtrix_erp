@@ -22,7 +22,7 @@ CREATE TABLE products (
     id INTEGER PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    labor_hours REAL NOT NULL CHECK(labor_hours >= 0),
+    quantity INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0),
     sale_price REAL CHECK(sale_price >= 0)
 );
 CREATE TABLE bom_items (
