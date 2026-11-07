@@ -30,7 +30,7 @@ CREATE TABLE bom_items (
     product_id INTEGER NOT NULL REFERENCES products(id),
     component_id INTEGER NOT NULL REFERENCES components(id),
     quantity INTEGER NOT NULL CHECK (quantity > 0),
-    UNIQUE (product_id, component_id),
+    UNIQUE (product_id, component_id)
 );
 CREATE TABLE orders (
     id INTEGER PRIMARY KEY,
