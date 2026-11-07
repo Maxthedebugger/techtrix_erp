@@ -37,7 +37,7 @@ CREATE TABLE orders (
     product_id INTEGER REFERENCES products(id) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity  > 0),
     due_date TEXT,
-    status TEXT NOT NULL DEFAULT 'new' CHECK(status IN('new','in_production','done')),
+    status TEXT NOT NULL DEFAULT 'new' CHECK(status IN('new','in_production','done', 'shipped','cancelled')),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE stock_movements (
