@@ -29,14 +29,14 @@ CREATE TABLE bom_items (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),
     component_id INTEGER NOT NULL REFERENCES components(id),
-    quantity INTEGER NOT NULL CHECK (quantity > 0)
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    UNIQUE (product_id, component_id),
 );
 CREATE TABLE orders (
     id INTEGER PRIMARY KEY,
     customer TEXT NOT NULL,
     product_id INTEGER REFERENCES products(id) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity  > 0),
-    UNIQUE (product_id, component_id),
     due_date TEXT,
     status TEXT NOT NULL DEFAULT 'new' CHECK(status IN('new','in_production','done', 'shipped','cancelled')),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
