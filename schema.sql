@@ -45,6 +45,7 @@ CREATE TABLE stock_movements (
     id INTEGER PRIMARY KEY,
     component_id INTEGER REFERENCES components(id) NOT NULL, 
     change INTEGER NOT NULL,
+    unit_price REAL CHECK (unit_price >= 0),
     reason TEXT NOT NULL CHECK(reason IN ('delivery', 'production', 'correction')),
     order_id INTEGER REFERENCES orders(id),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
