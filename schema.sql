@@ -55,3 +55,9 @@ CREATE TABLE settings (
     value REAL NOT NULL
     
 );
+CREATE TABLE processes (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    hourly_rate REAL NOT NULL CHECK (hourly_rate >= 0)
+    
+);
