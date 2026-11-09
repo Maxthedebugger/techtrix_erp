@@ -70,3 +70,13 @@ product_processes (
     hours REAL NOT NULL CHECK (hours > 0),
     UNIQUE (product_id, process_id)
 );
+CREATE TABLE 
+
+product_movements  (
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    change INTEGER NOT NULL,
+    reason TEXT NOT NULL CHECK (reason IN('production', 'shipment', 'correction')),
+    order_id INTEGER REFERENCES orders(id),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
