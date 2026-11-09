@@ -10,15 +10,15 @@ def get_db():
 
 
 def init_db():
-                          # най-горе, до import sqlite3: работа с файлове
-    if os.path.exists("techtrix.db"):    # връща True, ако файлът го има
-        os.remove("techtrix.db")         # изтрива файла
+                          
+    if os.path.exists("techtrix.db"):    
+        os.remove("techtrix.db")        
     conn = get_db()
-    with open("schema.sql", encoding="utf-8") as f:  # отваря файла и го затваря сам след блока
-        sql = f.read()                                # целият текст отива в променливата sql
-    conn.executescript(sql)   # изпълнява МНОГО SQL команди наведнъж (execute може само една)
-    conn.commit()             # „запиши промените“
-    conn.close()              # затвори връзката
+    with open("schema.sql", encoding="utf-8") as f:  
+        sql = f.read()                                
+    conn.executescript(sql)  
+    conn.commit()            
+    conn.close()          
 
 
 if __name__ == "__main__":

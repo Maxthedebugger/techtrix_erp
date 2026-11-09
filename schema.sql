@@ -1,13 +1,10 @@
-CREATE TABLE 
-
-users (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('director', 'warehouse', 'production'))
 );
-CREATE TABLE
-components (
+CREATE TABLE components (
     id INTEGER PRIMARY KEY,
     part_number TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
@@ -61,18 +58,14 @@ CREATE TABLE processes (
     hourly_rate REAL NOT NULL CHECK (hourly_rate >= 0)
 
 );
-CREATE TABLE 
-
-product_processes (
+CREATE TABLE product_processes (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),
     process_id INTEGER NOT NULL REFERENCES processes(id),
     hours REAL NOT NULL CHECK (hours > 0),
     UNIQUE (product_id, process_id)
 );
-CREATE TABLE 
-
-product_movements  (
+CREATE TABLE product_movements  (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL REFERENCES products(id),
     change INTEGER NOT NULL,
