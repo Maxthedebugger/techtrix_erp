@@ -50,13 +50,11 @@ CREATE TABLE stock_movements (
 CREATE TABLE settings (
     key TEXT PRIMARY KEY,
     value REAL NOT NULL
-    
 );
 CREATE TABLE processes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     hourly_rate REAL NOT NULL CHECK (hourly_rate >= 0)
-
 );
 CREATE TABLE product_processes (
     id INTEGER PRIMARY KEY,
