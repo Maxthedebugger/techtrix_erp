@@ -59,5 +59,14 @@ CREATE TABLE processes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     hourly_rate REAL NOT NULL CHECK (hourly_rate >= 0)
-    
+
+);
+CREATE TABLE 
+
+product_processes (
+    id INTEGER PRIMARY KEY,
+    product_id INTEGER NOT NULL REFERENCES products(id),
+    process_id INTEGER NOT NULL REFERENCES processes(id),
+    hours REAL NOT NULL CHECK (hours > 0),
+    UNIQUE (product_id, process_id)
 );
