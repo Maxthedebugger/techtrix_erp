@@ -43,8 +43,22 @@ def seed():
             "INSERT INTO components (part_number, name, type, price, min_quantity) VALUES (?, ?, ?, ?, ?)",
             component
         )
+
+    products = [
+            ("TX-HUM1", "Сензор за влажност", 29.00),
+            ("TX-ETH1", "Ethernet контролер", 59.00),
+            ("TX-GSM1", "LTE контролер", 89.00),
+    ]
+    for product in products:
+        conn.execute(
+            "INSERT INTO products (code, name, sale_price) VALUES (?, ?, ?)",
+            product
+        )
     conn.commit()          
-    conn.close()           
+    conn.close()     
+
+    
+    
     
 if __name__ == "__main__":
     seed()
