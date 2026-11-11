@@ -112,6 +112,34 @@ def seed():
                         ?)""",
             product_process
         )
+    deliveries = [
+        ("PCB-HUM1", 100, 1.50),
+        ("PCB-ETH1", 50, 3.00),
+        ("PCB-GSM1", 15, 3.50),
+        ("STM32F103", 200, 3.50),
+        ("SHT31", 100, 3.00),
+        ("W5500", 50, 2.50),
+        ("SIM7080G", 30, 9.00),
+        ("AMS1117-3.3", 200, 0.20),
+        ("R-10K", 2000, 0.02),
+        ("C-100N", 2000, 0.03),
+        ("TB-2P", 300, 0.40),
+        ("RJ45-MAG", 50, 1.50),
+        ("SIM-HOLDER", 30, 0.40),
+        ("ANT-LTE", 8, 2.00),
+        ("BOX-60x40", 100, 1.50),
+        ("BOX-DIN", 80, 4.00),
+    ]
+    for part, qty, price in deliveries:
+        conn.execute(
+            "UPDATE components SET quantity = quantity + ? WHERE part_number = ?",
+            (qty, part)
+        )
+        conn.execute(
+            "INSERT INTO stock_movements (component_id, change, unit_price, reason) VALUES ((SELECT id FROM components WHERE part_number = ?), ?, ?, 'delivery')",
+            (part, qty, price)
+        )
+        
     conn.commit()          
     conn.close()     
 
