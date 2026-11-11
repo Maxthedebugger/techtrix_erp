@@ -54,6 +54,44 @@ def seed():
             "INSERT INTO products (code, name, sale_price) VALUES (?, ?, ?)",
             product
         )
+
+        bom = [
+        ("TX-HUM1", "PCB-HUM1", 1),
+        ("TX-HUM1", "SHT31", 1),
+        ("TX-HUM1", "STM32F103", 1),
+        ("TX-HUM1", "AMS1117-3.3", 1),
+        ("TX-HUM1", "R-10K", 4),
+        ("TX-HUM1", "C-100N", 4),
+        ("TX-HUM1", "TB-2P", 1),
+        ("TX-HUM1", "BOX-60x40", 1),
+        ("TX-ETH1", "PCB-ETH1", 1),
+        ("TX-ETH1", "STM32F103", 1),
+        ("TX-ETH1", "W5500", 1),
+        ("TX-ETH1", "RJ45-MAG", 1),
+        ("TX-ETH1", "AMS1117-3.3", 1),
+        ("TX-ETH1", "R-10K", 8),
+        ("TX-ETH1", "C-100N", 10),
+        ("TX-ETH1", "TB-2P", 3),
+        ("TX-ETH1", "BOX-DIN", 1),
+        ("TX-GSM1", "PCB-GSM1", 1),
+        ("TX-GSM1", "STM32F103", 1),
+        ("TX-GSM1", "SIM7080G", 1),
+        ("TX-GSM1", "SIM-HOLDER", 1),
+        ("TX-GSM1", "ANT-LTE", 1),
+        ("TX-GSM1", "AMS1117-3.3", 1),
+        ("TX-GSM1", "R-10K", 8),
+        ("TX-GSM1", "C-100N", 10),
+        ("TX-GSM1", "TB-2P", 3),
+        ("TX-GSM1", "BOX-DIN", 1),
+    ]
+    for item in bom:
+        conn.execute(
+            """INSERT INTO bom_items (product_id, component_id, quantity)
+               VALUES ((SELECT id FROM products WHERE code = ?),
+                       (SELECT id FROM components WHERE part_number = ?),
+                       ?)""",
+            item
+        )
     conn.commit()          
     conn.close()     
 
