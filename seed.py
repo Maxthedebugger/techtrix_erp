@@ -92,6 +92,26 @@ def seed():
                        ?)""",
             item
         )
+
+    product_processes = [
+        ("TX-HUM1", "SMT монтаж", 0.2),
+        ("TX-HUM1", "Ръчно запояване", 0.1),
+        ("TX-HUM1", "Тест", 0.2),
+        ("TX-ETH1", "SMT монтаж", 0.3),
+        ("TX-ETH1", "Ръчно запояване", 0.25),
+        ("TX-ETH1", "Тест", 0.25),
+        ("TX-GSM1", "SMT монтаж", 0.4),
+        ("TX-GSM1", "Ръчно запояване", 0.3),
+        ("TX-GSM1", "Тест", 0.3),
+    ]
+    for product_process in product_processes:
+        conn.execute(
+             """INSERT INTO product_processes (product_id, process_id, hours)
+                VALUES ((SELECT id FROM products WHERE code = ?),
+                        (SELECT id FROM processes WHERE name = ?),
+                        ?)""",
+            product_process
+        )
     conn.commit()          
     conn.close()     
 
