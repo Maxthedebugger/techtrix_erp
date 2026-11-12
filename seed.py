@@ -1,4 +1,5 @@
 from database import get_db, init_db 
+from werkzeug.security import generate_password_hash
 
 def seed():
     init_db()              
@@ -139,7 +140,21 @@ def seed():
             "INSERT INTO stock_movements (component_id, change, unit_price, reason) VALUES ((SELECT id FROM components WHERE part_number = ?), ?, ?, 'delivery')",
             (part, qty, price)
         )
+        users = [
+        ("director", "director123", "director"),
+        ("warehouse", "warehouse123", "warehouse"),
+        ("production", "production123", "production"),
+    ]
         
+    for username, password, role in users:
+        conn.execute(
+            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
+            (username, generate_password_hash(password), role)
+        )
+            
+        
+        
+     
     conn.commit()          
     conn.close()     
 
