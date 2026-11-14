@@ -43,3 +43,8 @@ th, td {
 th {
     background: #e8eef4;
 }
+.low {
+    background: #fde2e2;
+    color: #a40000;
+    font-weight: bold;
+}
