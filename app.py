@@ -10,8 +10,7 @@ app.secret_key = "techtrix-dev-key-2026"
 def index():
     if "username" not in session:
         return redirect(url_for("login"))
-    return render_template("index.html", name=session["username"], role=session["role"])
-
+    return render_template("index.html")
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":

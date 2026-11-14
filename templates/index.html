@@ -1,19 +1,7 @@
-<!DOCTYPE html>
-<html lang="bg">
-<head>
+{% extends "base.html" %}
+{% block content %}
     
-<meta charset="utf-8">
+<h1>Добре дошли, {{ session.username }}!</h1>
     
-<title>Techtrix ERP</title>
-</head>
-<body>
-    
-<h1>Techtrix ERP</h1>
-    
-<p>Добре дошли, {{ name }}!</p>
-    
-<p>Роля: {{ role }}</p>
-    
-<p><a href="/logout">Изход</a></p>
-</body>
-</html>
+<p>Вашата роля е: {{ session.role }}</p>
+{% endblock %}

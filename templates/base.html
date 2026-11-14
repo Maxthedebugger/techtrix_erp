@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    
+<meta charset="utf-8">
+    
+<title>{% block title %}Techtrix ERP{% endblock %}</title>
+    
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+<header>
+        
+<strong>Techtrix ERP</strong>
+        
+{% if session.username %}
+            
+<nav>
+                
+<a href="{{ url_for('index') }}">Начало</a>
+            
+</nav>
+            
+<span>{{ session.username }} ({{ session.role }}) · <a href="{{ url_for('logout') }}">Изход</a></span>
+        
+{% endif %}
+    
+</header>
+    
+<main>
+        
+{% block content %}{% endblock %}
+    
+</main>
+</body>
+</html>
