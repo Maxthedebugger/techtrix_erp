@@ -23,7 +23,6 @@
 </tr>
         
 {% for c in components %}
-     <tr {% if c.quantity < c.min_quantity %}class="low"{% endif %}></c.min_quantity>   
 <tr {% if c.quantity < c.min_quantity %}class="low"{% endif %}>
             
 <td>{{ c.part_number }}</td>
