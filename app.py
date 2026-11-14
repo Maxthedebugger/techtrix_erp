@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash
 from database import get_db
+from services.inventory import receive_delivery
 
 app = Flask(__name__)
 
@@ -47,5 +48,21 @@ def components():
     rows = conn.execute("SELECT * FROM components ORDER BY part_number").fetchall()
     conn.close()
     return render_template("components.html", components=rows)
+@app.route("/delivery", methods=["GET", "POST"])
+def delivery():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        component_id = int(request.form["component_id"])
+        qty = int(request.form["qty"])
+        unit_price = float(request.form["unit_price"])
+        receive_delivery(conn, component_id, qty, unit_price)
+        conn.close()
+        return redirect(url_for("components"))
+    rows = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
+    conn.close()
+    return render_template("delivery.html", components=rows)
 if __name__ == "__main__":
     app.run(debug=True)

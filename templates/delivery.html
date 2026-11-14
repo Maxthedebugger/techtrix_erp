@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Доставка · Techtrix ERP{% endblock %}
+{% block content %}
+    
+<h1>Нова доставка</h1>
+    
+<form method="post">
+        
+<p>
+            
+Компонент:
+            
+<select name="component_id">
+                
+{% for c in components %}
+                
+<option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
+                
+{% endfor %}
+            
+</select>
+        
+</p>
+        
+<p>Количество: <input type="number" name="qty" min="1" required></p>
+        
+<p>Цена за брой (€): <input type="number" name="unit_price" min="0" step="0.01" required></p>
+        
+<button type="submit">Заприхождавай</button>
+    
+</form>
+{% endblock %}
