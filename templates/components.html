@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Склад · Techtrix ERP{% endblock %}
+{% block content %}
+    
+<h1>Склад: компоненти</h1>
+    
+<table>
+        
+<tr>
+            
+<th>Код</th>
+            
+<th>Име</th>
+            
+<th>Тип</th>
+            
+<th>Количество</th>
+            
+<th>Минимум</th>
+            
+<th>Цена (€)</th>
+        
+</tr>
+        
+{% for c in components %}
+        
+<tr>
+            
+<td>{{ c.part_number }}</td>
+            
+<td>{{ c.name }}</td>
+            
+<td>{{ c.type }}</td>
+            
+<td>{{ c.quantity }}</td>
+            
+<td>{{ c.min_quantity }}</td>
+            
+<td>{{ "%.2f"|format(c.price) }}</td>
+        
+</tr>
+        
+{% endfor %}
+    
+</table>
+{% endblock %}

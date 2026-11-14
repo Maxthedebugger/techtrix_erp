@@ -27,3 +27,19 @@ main {
     margin: 24px auto;
     padding: 0 16px;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #e8eef4;
+}

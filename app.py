@@ -5,6 +5,12 @@ from database import get_db
 app = Flask(__name__)
 
 app.secret_key = "techtrix-dev-key-2026"
+def require_role(*roles):
+    if "username" not in session:
+        return redirect(url_for("login"))
+    if roles and session["role"] not in roles:
+        return "Нямате достъп до тази страница", 403
+    return None
 
 @app.route("/")
 def index():
@@ -32,5 +38,14 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+@app.route("/components")
+def components():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM components ORDER BY part_number").fetchall()
+    conn.close()
+    return render_template("components.html", components=rows)
 if __name__ == "__main__":
     app.run(debug=True)
