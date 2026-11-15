@@ -136,5 +136,30 @@ def products():
     rows = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
     conn.close()
     return render_template("products.html", products=rows)
+@app.route("/products/<int:product_id>")
+def product_detail(product_id):
+    denied = require_role()
+    if denied:
+        return denied
+    conn = get_db()
+    product = conn.execute("SELECT * FROM products WHERE id = ?").fetchone()  
+    if product is None:
+        conn.close()
+        return "Няма такъв продукт", 404
+    bom = conn.execute("""
+        SELECT c.part_number, c.name, b.quantity
+        FROM bom_items b
+        JOIN components c ON b.component_id = c.id
+        WHERE b.product_id = ?
+        ORDER BY c.part_number
+    """, (product_id,)).fetchall()
+    processes = conn.execute("""
+        SELECT pr.name, pp.hours
+        FROM product_processes pp
+        JOIN processes pr ON pp.process_id = pr.id
+        WHERE pp.product_id = ?
+    """, (product_id,)).fetchall()
+    conn.close()
+    return render_template("product_detail.html", product=product, bom=bom, processes=processes)
 if __name__ == "__main__":
     app.run(debug=True)

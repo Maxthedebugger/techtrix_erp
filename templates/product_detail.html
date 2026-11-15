@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ product.code }} · Techtrix ERP{% endblock %}
+{% block content %}
+    <h1>{{ product.code }} · {{ product.name }}</h1>
+    <p><a href="{{ url_for('products') }}">← Всички продукти</a></p>
+
+    <h2>Рецепта (компоненти за 1 брой)</h2>
+    <table>
+        <tr>
+            <th>Код</th>
+            <th>Компонент</th>
+            <th>Брой</th>
+        </tr>
+        {% for b in bom %}
+        <tr>
+            <td>{{ b.part_number }}</td>
+            <td>{{ b.name }}</td>
+            <td>{{ b.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Процеси (часове за 1 брой)</h2>
+    <table>
+        <tr>
+            <th>Процес</th>
+            <th>Часове</th>
+        </tr>
+        {% for pr in processes %}
+        <tr>
+            <td>{{ pr.name }}</td>
+            <td>{{ pr.hours }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
