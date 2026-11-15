@@ -33,4 +33,14 @@
         </tr>
         {% endfor %}
     </table>
+    {% if cost %}
+    <h2>Себестойност (за 1 брой)</h2>
+    <table>
+        <tr><td>Материали</td><td>{{ "%.2f"|format(cost.materials) }} €</td></tr>
+        <tr><td>Труд</td><td>{{ "%.2f"|format(cost.labor) }} €</td></tr>
+        <tr><td>Режийни</td><td>{{ "%.2f"|format(cost.overhead) }} €</td></tr>
+        <tr><th>Общо</th><th>{{ "%.2f"|format(cost.total) }} €</th></tr>
+    </table>
+    <p>Продажна цена: {{ "%.2f"|format(product.sale_price) }} € · Печалба: {{ "%.2f"|format(product.sale_price - cost.total) }} €</p>
+    {% endif %}
 {% endblock %}

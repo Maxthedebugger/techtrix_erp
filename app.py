@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
 from services.inventory import receive_delivery, correct_stock
+from services.costing import calc_cost
 
 app = Flask(__name__)
 
@@ -159,7 +160,10 @@ def product_detail(product_id):
         JOIN processes pr ON pp.process_id = pr.id
         WHERE pp.product_id = ?
     """, (product_id,)).fetchall()
+    cost = None
+    if session["role"] == "director":
+        cost = calc_cost(conn, product_id)
     conn.close()
-    return render_template("product_detail.html", product=product, bom=bom, processes=processes)
+    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost)
 if __name__ == "__main__":
     app.run(debug=True)
