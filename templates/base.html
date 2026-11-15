@@ -19,14 +19,26 @@
 <nav>
                 
 <a href="{{ url_for('index') }}">Начало</a>
+                
 {% if session.role in ["director", "warehouse"] %}
+                    
 <a href="{{ url_for('components') }}">Склад</a>
-
+                    
 <a href="{{ url_for('movements') }}">Движения</a>
+                
 {% endif %}
+            
 </nav>
             
-<span>{{ session.username }} ({{ session.role }}) · <a href="{{ url_for('logout') }}">Изход</a></span>
+<span>
+                
+{{ session.username }} ({{ session.role }})
+                
+· <a href="{{ url_for('change_password') }}">Смени паролата</a>
+                
+· <a href="{{ url_for('logout') }}">Изход</a>
+            
+</span>
         
 {% endif %}
     

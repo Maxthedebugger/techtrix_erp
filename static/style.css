@@ -53,3 +53,8 @@ th {
     background: #fde2e2;
     color: #a40000;
 }
+.success {
+    padding: 8px 12px;
+    background: #e2f5e2;
+    color: #1a6b1a;
+}

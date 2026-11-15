@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
 from services.inventory import receive_delivery, correct_stock
 
@@ -97,5 +97,35 @@ def correction():
     rows = conn.execute("SELECT id, part_number, name, quantity FROM components ORDER BY part_number").fetchall()
     conn.close()
     return render_template("correction.html", components=rows, error=error)
+@app.route("/change-password", methods=["GET", "POST"])
+def change_password():
+    denied = require_role()
+    if denied:
+        return denied
+    error = None
+    message = None
+    if request.method == "POST":
+        old = request.form["old_password"]
+        new = request.form["new_password"]
+        new2 = request.form["new_password2"]
+        conn = get_db()
+        user = conn.execute(
+            "SELECT * FROM users WHERE username = ?", (session["username"],)
+        ).fetchone()
+        if not check_password_hash(user["password_hash"], old):
+            error = "Старата парола е грешна"
+        elif new != new2:
+            error = "Новите пароли не съвпадат"
+        elif len(new) < 6:
+            error = "Новата парола трябва да е поне 6 символа"
+        else:
+            with conn:
+                conn.execute(
+                    "UPDATE users SET password_hash = ? WHERE id = ?",
+                    (generate_password_hash(new), user["id"])
+                )
+            message = "Паролата е сменена"
+        conn.close()
+    return render_template("change_password.html", error=error, message=message)
 if __name__ == "__main__":
     app.run(debug=True)
