@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Корекция · Techtrix ERP{% endblock %}
+{% block content %}
+    
+<h1>Корекция на наличност</h1>
+    
+<p>Ползва се при инвентаризация: брак, загуба или намерени бройки. Отрицателно число намалява, положително увеличава.</p>
+    
+{% if error %}
+        
+<p class="error">{{ error }}</p>
+    
+{% endif %}
+    
+<form method="post">
+        
+<p>
+            
+Компонент:
+            
+<select name="component_id">
+                
+{% for c in components %}
+                
+<option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }} (налични: {{ c.quantity }})</option>
+                
+{% endfor %}
+            
+</select>
+        
+</p>
+        
+<p>Промяна (бр.): <input type="number" name="change" required></p>
+        
+<button type="submit">Запиши корекцията</button>
+    
+</form>
+{% endblock %}

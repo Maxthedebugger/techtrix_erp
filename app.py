@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from werkzeug.security import check_password_hash
 from database import get_db
-from services.inventory import receive_delivery
+from services.inventory import receive_delivery, correct_stock
 
 app = Flask(__name__)
 
@@ -78,5 +78,24 @@ def movements():
     ).fetchall()
     conn.close()
     return render_template("movements.html", movements=rows)
+@app.route("/correction", methods=["GET", "POST"])
+def correction():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    error = None
+    if request.method == "POST":
+        component_id = int(request.form["component_id"])
+        change = int(request.form["change"])
+        try:
+            correct_stock(conn, component_id, change)
+            conn.close()
+            return redirect(url_for("components"))
+        except ValueError as e:
+            error = str(e)
+    rows = conn.execute("SELECT id, part_number, name, quantity FROM components ORDER BY part_number").fetchall()
+    conn.close()
+    return render_template("correction.html", components=rows, error=error)
 if __name__ == "__main__":
     app.run(debug=True)
