@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Движения · Techtrix ERP{% endblock %}
+{% block content %}
+    
+<h1>Дневник на движенията</h1>
+    
+<table>
+        
+<tr>
+            
+<th>Дата</th>
+            
+<th>Код</th>
+            
+<th>Компонент</th>
+            
+<th>Промяна</th>
+            
+<th>Цена (€)</th>
+            
+<th>Причина</th>
+        
+</tr>
+        
+{% for m in movements %}
+        
+<tr>
+            
+<td>{{ m.created_at }}</td>
+            
+<td>{{ m.part_number }}</td>
+            
+<td>{{ m.name }}</td>
+            
+<td>{{ "%+d"|format(m.change) }}</td>
+            
+<td>{% if m.unit_price %}{{ "%.2f"|format(m.unit_price) }}{% endif %}</td>
+            
+<td>{{ m.reason }}</td>
+        
+</tr>
+        
+{% endfor %}
+    
+</table>
+{% endblock %}

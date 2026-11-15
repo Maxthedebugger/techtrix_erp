@@ -64,5 +64,19 @@ def delivery():
     rows = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
     conn.close()
     return render_template("delivery.html", components=rows)
+@app.route("/movements")
+def movements():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT m.created_at, c.part_number, c.name, m.change, m.unit_price, m.reason
+           FROM stock_movements m
+           JOIN components c ON c.id = m.component_id
+           ORDER BY m.id DESC"""
+    ).fetchall()
+    conn.close()
+    return render_template("movements.html", movements=rows)
 if __name__ == "__main__":
     app.run(debug=True)
