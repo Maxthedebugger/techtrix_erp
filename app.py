@@ -127,5 +127,14 @@ def change_password():
             message = "Паролата е сменена"
         conn.close()
     return render_template("change_password.html", error=error, message=message)
+@app.route("/products")
+def products():
+    denied = require_role()
+    if denied:
+        return denied
+    conn = get_db()
+    rows = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
+    conn.close()
+    return render_template("products.html", products=rows)
 if __name__ == "__main__":
     app.run(debug=True)
