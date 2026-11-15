@@ -142,7 +142,7 @@ def product_detail(product_id):
     if denied:
         return denied
     conn = get_db()
-    product = conn.execute("SELECT * FROM products WHERE id = ?").fetchone()  
+    product = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()  
     if product is None:
         conn.close()
         return "Няма такъв продукт", 404
