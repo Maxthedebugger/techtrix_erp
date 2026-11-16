@@ -179,6 +179,6 @@ def product_detail(product_id):
         cost = calc_cost(conn, product_id)
         all_components = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
     conn.close()
-    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost)
+    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
 if __name__ == "__main__":
     app.run(debug=True)
