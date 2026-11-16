@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
 from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
+from services.recipes import set_bom_item
 
 app = Flask(__name__)
 
@@ -137,7 +138,7 @@ def products():
     rows = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
     conn.close()
     return render_template("products.html", products=rows)
-@app.route("/products/<int:product_id>")
+@app.route("/products/<int:product_id>", methods=["GET", "POST"])
 def product_detail(product_id):
     denied = require_role()
     if denied:
@@ -147,6 +148,15 @@ def product_detail(product_id):
     if product is None:
         conn.close()
         return "Няма такъв продукт", 404
+    if request.method == "POST":
+        if session["role"] != "director":
+            conn.close()
+            return "Нямате достъп", 403
+        component_id = int(request.form["component_id"])
+        quantity = int(request.form["quantity"])
+        set_bom_item(conn, product_id, component_id, quantity)
+        conn.close()
+        return redirect(url_for("product_detail", product_id=product_id))
     bom = conn.execute("""
         SELECT c.part_number, c.name, b.quantity
         FROM bom_items b
@@ -163,6 +173,11 @@ def product_detail(product_id):
     cost = None
     if session["role"] == "director":
         cost = calc_cost(conn, product_id)
+        cost = None
+    all_components = []
+    if session["role"] == "director":
+        cost = calc_cost(conn, product_id)
+        all_components = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
     conn.close()
     return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost)
 if __name__ == "__main__":

@@ -33,6 +33,39 @@
         </tr>
         {% endfor %}
     </table>
+        
+{% if session.role == "director" %}
+    
+<h2>Промяна на рецептата</h2>
+    
+<form method="post">
+        
+<p>
+            
+Компонент:
+            
+<select name="component_id">
+                
+{% for c in all_components %}
+                
+<option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
+                
+{% endfor %}
+            
+</select>
+        
+</p>
+        
+<p>Брой за 1 продукт: <input type="number" name="quantity" min="0" required></p>
+        
+<button type="submit">Запиши</button>
+    
+</form>
+    
+<p>Нов компонент се добавя. При съществуващ се сменя броят. Брой 0 го маха от рецептата.</p>
+    
+{% endif %}
+
     {% if cost %}
     <h2>Себестойност (за 1 брой)</h2>
     <table>
