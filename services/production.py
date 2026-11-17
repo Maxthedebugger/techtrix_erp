@@ -1,5 +1,10 @@
 def start_production(conn, order_id):
     order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    if order is None:
+        raise ValueError("Няма такава поръчка")
+    if order["status"] != "new":
+        raise ValueError("Само нова поръчка може да влезе в производство")
     if order["status"] != "new":
         raise ValueError("Само нова поръчка може да влезе в производство")
     needs = conn.execute("""
@@ -8,8 +13,6 @@ def start_production(conn, order_id):
         JOIN components c ON b.component_id = c.id
         WHERE b.product_id = ?
     """, (order["quantity"], order["product_id"])).fetchall()
-    if order is None:
-        raise ValueError("Няма такава поръчка")
     missing = []
     for n in needs:
         if n["in_stock"] < n["needed"]:
