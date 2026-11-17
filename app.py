@@ -171,16 +171,17 @@ def product_detail(product_id):
         WHERE pp.product_id = ?
     """, (product_id,)).fetchall()
     cost = None
-    if session["role"] == "director":
-        cost = calc_cost(conn, product_id)
-        cost = None
     all_components = []
     if session["role"] == "director":
         cost = calc_cost(conn, product_id)
         all_components = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
-    @app.route("/orders", methods=["GET", "POST"])
-    def orders():
-        denied = require_role()
+    conn.close()
+    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
+
+
+@app.route("/orders", methods=["GET", "POST"])
+def orders():
+    denied = require_role()
     if denied:
         return denied
     conn = get_db()
@@ -193,15 +194,22 @@ def product_detail(product_id):
         quantity = int(request.form["quantity"])
         due_date = request.form["due_date"] or None
         with conn:
-            conn.execute("INSERT INTO orders (customer,product_id, quantity, due_date) VALUES (?, ?, ?, ?)",
-                         (customer,product_id, quantity, due_date))   
+            conn.execute(
+                "INSERT INTO orders (customer, product_id, quantity, due_date) VALUES (?, ?, ?, ?)",
+                (customer, product_id, quantity, due_date)
+            )
         conn.close()
         return redirect(url_for("orders"))
-    rows = ...   # ← всички поръчки + кода на продукта (JOIN), най-новите отгоре
+    rows = conn.execute("""
+        SELECT o.id, o.customer, p.code, o.quantity, o.due_date, o.status
+        FROM orders o
+        JOIN products p ON o.product_id = p.id
+        ORDER BY o.id DESC
+    """).fetchall()
     products = conn.execute("SELECT id, code, name FROM products ORDER BY code").fetchall()
     conn.close()
     return render_template("orders.html", orders=rows, products=products)
-    conn.close()
-    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
