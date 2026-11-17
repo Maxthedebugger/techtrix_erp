@@ -4,6 +4,7 @@ from database import get_db
 from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
 from services.recipes import set_bom_item
+from services.production import start_production
 
 app = Flask(__name__)
 
