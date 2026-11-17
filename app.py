@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
 from services.inventory import receive_delivery, correct_stock
@@ -210,6 +210,19 @@ def orders():
     conn.close()
     return render_template("orders.html", orders=rows, products=products)
 
-
+@app.route("/orders/<int:order_id>/start", methods=["POST"])
+def order_start(order_id):
+    denied = require_role("director", "production")        # ← позволи само "director" и "production"
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        start_production(conn, order_id)
+    except ValueError as e:
+        flash(str(e))
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("orders"))
 if __name__ == "__main__":
     app.run(debug=True)
