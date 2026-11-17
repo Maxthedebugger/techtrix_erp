@@ -178,6 +178,29 @@ def product_detail(product_id):
     if session["role"] == "director":
         cost = calc_cost(conn, product_id)
         all_components = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
+    @app.route("/orders", methods=["GET", "POST"])
+    def orders():
+        denied = require_role()
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        if session["role"] != "director":
+            conn.close()
+            return "Нямате достъп", 403
+        customer = request.form["customer"]
+        product_id = int(request.form["product_id"])
+        quantity = int(request.form["quantity"])
+        due_date = request.form["due_date"] or None
+        with conn:
+            conn.execute("INSERT INTO orders (customer,product_id, quantity, due_date) VALUES (?, ?, ?, ?)",
+                         (customer,product_id, quantity, due_date))   
+        conn.close()
+        return redirect(url_for("orders"))
+    rows = ...   # ← всички поръчки + кода на продукта (JOIN), най-новите отгоре
+    products = conn.execute("SELECT id, code, name FROM products ORDER BY code").fetchall()
+    conn.close()
+    return render_template("orders.html", orders=rows, products=products)
     conn.close()
     return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
 if __name__ == "__main__":

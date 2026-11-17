@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Поръчки · Techtrix ERP{% endblock %}
+{% block content %}
+    
+<h1>Поръчки</h1>
+    
+{% if session.role == "director" %}
+    
+<h2>Нова поръчка</h2>
+    
+<form method="post">
+        
+<p>Клиент: <input type="text" name="customer" required></p>
+        
+<p>
+            
+Продукт:
+            
+<select name="product_id">
+                
+{% for p in products %}
+                
+<option value="{{ p.id }}">{{ p.code }} · {{ p.name }}</option>
+                
+{% endfor %}
+            
+</select>
+        
+</p>
+        
+<p>Брой: <input type="number" name="quantity" min="1" required></p>
+        
+<p>Срок: <input type="date" name="due_date"></p>
+        
+<button type="submit">Създай поръчка</button>
+    
+</form>
+    
+{% endif %}
+    
+<h2>Всички поръчки</h2>
+    
+<table>
+        
+<tr>
+            
+<th>№</th>
+            
+<th>Клиент</th>
+            
+<th>Продукт</th>
+            
+<th>Брой</th>
+            
+<th>Срок</th>
+            
+<th>Статус</th>
+        
+</tr>
+        
+{% for o in orders %}
+        
+<tr>
+            
+<td>{{ o.id }}</td>
+            
+<td>{{ o.customer }}</td>
+            
+<td>{{ o.code }}</td>
+            
+<td>{{ o.quantity }}</td>
+            
+<td>{{ o.due_date or "—" }}</td>
+            
+<td>{{ o.status }}</td>
+        
+</tr>
+        
+{% endfor %}
+    
+</table>
+{% endblock %}
