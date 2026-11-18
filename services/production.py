@@ -28,8 +28,8 @@ def start_production(conn, order_id):
             )
         conn.execute("UPDATE orders SET status = 'in_production' WHERE id = ?", (order_id,))
 
-    def finish_order(conn, order_id):
-        order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+def finish_order(conn, order_id):
+    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
     if order is None:
         raise ValueError("Няма такава поръчка")
     if order["status"] != "in_production":
