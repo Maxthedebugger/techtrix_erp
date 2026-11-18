@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Отчет · Techtrix ERP{% endblock %}
+{% block content %}
+    <h1>Отчет за печалбата</h1>
+    <table>
+        <tr>
+            <th>Код</th>
+            <th>Име</th>
+            <th>Себестойност (€)</th>
+            <th>Продажна цена (€)</th>
+            <th>Печалба (€)</th>
+            <th>Печалба (%)</th>
+        </tr>
+        {% for r in rows %}
+        <tr>
+            <td>{{ r.code }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ "%.2f"|format(r.cost) }}</td>
+            <td>{{ "%.2f"|format(r.price) }}</td>
+            <td>{{ "%.2f"|format(r.profit) }}</td>
+            <td>{{ "%.1f"|format(r.percent) }} %</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

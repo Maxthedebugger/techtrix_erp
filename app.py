@@ -275,5 +275,21 @@ def order_cancel(order_id):
         flash(str(e))
     conn.close()
     return redirect(url_for("orders"))
+@app.route("/report")
+def report():
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    products = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
+    rows = []
+    for p in products:
+        cost = calc_cost(conn, p["id"])
+        profit = p["sale_price"] - cost["total"]
+        percent = profit / p["sale_price"] * 100
+        rows.append({"code": p["code"], "name": p["name"], "cost": cost["total"],
+                     "price": p["sale_price"], "profit": profit, "percent": percent})
+    conn.close()
+    return render_template("report.html", rows=rows)
 if __name__ == "__main__":
     app.run(debug=True)
