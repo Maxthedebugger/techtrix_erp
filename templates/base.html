@@ -31,6 +31,9 @@
 <a href="{{ url_for('products') }}">Продукти</a>
                 
 <a href="{{ url_for('orders') }}">Поръчки</a>
+{% if session.role == "director" %}
+<a href="{{ url_for('report') }}">Отчет</a>
+{% endif %}
             
 </nav>
             
