@@ -79,8 +79,14 @@ def movements():
            JOIN components c ON c.id = m.component_id
            ORDER BY m.id DESC"""
     ).fetchall()
+    moves = conn.execute(
+        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id
+           FROM product_movements m
+           JOIN products p ON p.id = m.product_id
+           ORDER BY m.id DESC"""
+    ).fetchall()
     conn.close()
-    return render_template("movements.html", movements=rows)
+    return render_template("movements.html", movements=rows, moves=moves)
 @app.route("/correction", methods=["GET", "POST"])
 def correction():
     denied = require_role("director", "warehouse")
@@ -139,6 +145,12 @@ def products():
     rows = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
     conn.close()
     return render_template("products.html", products=rows)
+    moves = conn.execute(
+        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id
+           FROM product_movements m
+           JOIN ___ p ON p.id = m.___
+           ORDER BY m.id DESC"""
+    ).fetchall()
 @app.route("/products/<int:product_id>", methods=["GET", "POST"])
 def product_detail(product_id):
     denied = require_role()

@@ -43,4 +43,23 @@
 {% endfor %}
     
 </table>
+    <h2>Движение на продуктите</h2>
+    <table>
+        <tr>
+            <th>Дата</th>
+            <th>Продукт</th>
+            <th>Промяна</th>
+            <th>Причина</th>
+            <th>Поръчка №</th>
+        </tr>
+        {% for m in moves %}
+        <tr>
+            <td>{{ m.created_at }}</td>
+            <td>{{ m.code }}</td>
+            <td>{{ m.change }}</td>
+            <td>{{ m.reason }}</td>
+            <td>{{ m.order_id or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
