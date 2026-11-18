@@ -4,7 +4,7 @@ from database import get_db
 from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
 from services.recipes import set_bom_item
-from services.production import start_production, finish_order, ship_order
+from services.production import start_production, finish_order, ship_order, cancel_order
 
 app = Flask(__name__)
 
@@ -259,6 +259,18 @@ def order_ship(order_id):
     conn = get_db()
     try:
         ship_order(conn, order_id)
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("orders"))
+@app.route("/orders/<int:order_id>/cancel", methods=["POST"])
+def order_cancel(order_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        cancel_order(conn, order_id)
     except ValueError as e:
         flash(str(e))
     conn.close()

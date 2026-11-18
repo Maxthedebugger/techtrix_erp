@@ -93,7 +93,12 @@
 </form>
                 
 {% endif %}
-                
+                {% if o.status == "new" and session.role == "director" %}
+                <form method="post" action="{{ url_for('order_cancel', order_id=o.id) }}">
+                    <button type="submit">Откажи</button>
+                </form>
+                {% endif %}
+           
 {% if o.status == "in_production" and session.role in ["director", "production"] %}
                 
 <form method="post" action="{{ url_for('order_finish', order_id=o.id) }}">

@@ -56,3 +56,11 @@ def ship_order(conn, order_id):
             (order["product_id"], -order["quantity"], order_id)
         )
         conn.execute("UPDATE orders SET status = 'shipped' WHERE id = ?", (order_id,))
+def cancel_order(conn, order_id):
+    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    if order is None:
+        raise ValueError("Няма такава поръчка")
+    if order["status"] != "new":
+        raise ValueError("Само нова поръчка може да се откаже")
+    with conn:
+        conn.execute("UPDATE orders SET status = 'cancelled' WHERE id = ?", (order_id,))
