@@ -4,7 +4,7 @@ from database import get_db
 from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
 from services.recipes import set_bom_item
-from services.production import start_production
+from services.production import start_production, finish_order, ship_order
 
 app = Flask(__name__)
 
@@ -213,7 +213,7 @@ def orders():
 
 @app.route("/orders/<int:order_id>/start", methods=["POST"])
 def order_start(order_id):
-    denied = require_role("director", "production")        # ← позволи само "director" и "production"
+    denied = require_role("director", "production")        
     if denied:
         return denied
     conn = get_db()
@@ -221,6 +221,32 @@ def order_start(order_id):
         start_production(conn, order_id)
     except ValueError as e:
         flash(str(e))
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("orders"))
+@app.route("/orders/<int:order_id>/finish", methods=["POST"])
+def order_finish(order_id):
+    denied = require_role("director", "production")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        finish_order(conn, order_id)
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("orders"))
+
+
+@app.route("/orders/<int:order_id>/ship", methods=["POST"])
+def order_ship(order_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        ship_order(conn, order_id)
     except ValueError as e:
         flash(str(e))
     conn.close()

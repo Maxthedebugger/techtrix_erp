@@ -93,6 +93,26 @@
 </form>
                 
 {% endif %}
+                
+{% if o.status == "in_production" and session.role in ["director", "production"] %}
+                
+<form method="post" action="{{ url_for('order_finish', order_id=o.id) }}">
+                    
+<button type="submit">Готова</button>
+                
+</form>
+                
+{% endif %}
+                
+{% if o.status == "done" and session.role == "director" %}
+                
+<form method="post" action="{{ url_for('order_ship', order_id=o.id) }}">
+                    
+<button type="submit">Изпрати</button>
+                
+</form>
+                
+{% endif %}
             
 </td>
         
