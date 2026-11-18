@@ -30,23 +30,29 @@ def start_production(conn, order_id):
 
     def finish_order(conn, order_id):
         order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
-        if order is None:
-            raise ValueError("Няма такава поръчка")
-        if order["status"] != "in_production":
-            raise ValueError("Само поръчка в производство може да стане готова")
-        with conn:
-            conn.execute("UPDATE products SET quantity = quantity + ? WHERE id = ?", (order["quantity"], order["product_id"]))
-            conn.execute(
+    if order is None:
+        raise ValueError("Няма такава поръчка")
+    if order["status"] != "in_production":
+        raise ValueError("Само поръчка в производство може да стане готова")
+    with conn:
+        conn.execute("UPDATE products SET quantity = quantity + ? WHERE id = ?", (order["quantity"], order["product_id"]))
+        conn.execute(
             "INSERT INTO product_movements (product_id, change, reason, order_id) VALUES (?, ?, 'production', ?)",
             (order["product_id"], order["quantity"], order_id)
         )
         conn.execute("UPDATE orders SET status = 'done' WHERE id = ?", (order_id,))
-    def ship_order(conn, order_id):
-        order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
-        with conn:
-            conn.execute("UPDATE products SET quantity = quantity - ? WHERE id = ?", (order["quantity"], order["product_id"]))
-            conn.execute(
-                "INSERT INTO product_movements (product_id, change, reason, order_id) VALUES (?, ?, 'shipment', ?)",
-                (order["product_id"], -order["quantity"], order_id)
-            )
-            conn.execute("UPDATE orders SET status = 'shipped' WHERE id = ?", (order_id,))
+
+
+def ship_order(conn, order_id):
+    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    if order is None:
+        raise ValueError("Няма такава поръчка")
+    if order["status"] != "done":
+        raise ValueError("Само готова поръчка може да се изпрати")
+    with conn:
+        conn.execute("UPDATE products SET quantity = quantity - ? WHERE id = ?", (order["quantity"], order["product_id"]))
+        conn.execute(
+            "INSERT INTO product_movements (product_id, change, reason, order_id) VALUES (?, ?, 'shipment', ?)",
+            (order["product_id"], -order["quantity"], order_id)
+        )
+        conn.execute("UPDATE orders SET status = 'shipped' WHERE id = ?", (order_id,))
