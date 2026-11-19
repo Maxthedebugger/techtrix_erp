@@ -309,5 +309,22 @@ def forecast():
     conn.close()
     rows.sort(key=lambda r: r["days_left"])
     return render_template("forecast.html", rows=rows)
+@app.route("/products/<int:product_id>/price", methods=["POST"])
+def product_price(product_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    try:
+        price = float(request.form["sale_price"])
+        if price <= 0:
+            raise ValueError("Цената трябва да е по-голяма от 0")
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for("product_detail", product_id=product_id))
+    conn = get_db()
+    with conn:
+        conn.execute("UPDATE products SET sale_price = ? WHERE id = ?", (price, product_id))
+    conn.close()
+    return redirect(url_for("product_detail", product_id=product_id))
 if __name__ == "__main__":
     app.run(debug=True)
