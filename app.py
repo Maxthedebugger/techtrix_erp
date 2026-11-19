@@ -5,6 +5,7 @@ from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
 from services.recipes import set_bom_item
 from services.production import start_production, finish_order, ship_order, cancel_order
+from services.forecast import forecast_component
 
 app = Flask(__name__)
 
@@ -291,5 +292,22 @@ def report():
                      "price": p["sale_price"], "profit": profit, "percent": percent})
     conn.close()
     return render_template("report.html", rows=rows)
+@app.route("/forecast")
+def forecast():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    components = conn.execute("SELECT * FROM components ORDER BY part_number").fetchall()
+    rows = []
+    for c in components:
+        f = forecast_component(conn, c["id"])
+        if f is None:
+            continue
+        rows.append({"part_number": c["part_number"], "name": c["name"], "quantity": c["quantity"],
+                     "per_day": f["per_day"], "days_left": f["days_left"], "order_qty": f["order_qty"]})
+    conn.close()
+    rows.sort(key=lambda r: r["days_left"])
+    return render_template("forecast.html", rows=rows)
 if __name__ == "__main__":
     app.run(debug=True)

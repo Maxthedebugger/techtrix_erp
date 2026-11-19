@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}AI прогноза · Techtrix ERP{% endblock %}
+{% block content %}
+    <h1>AI прогноза за поръчки</h1>
+    <p>Прогнозата се смята с линейна регресия по харченето през последните 90 дни.</p>
+    <table>
+        <tr>
+            <th>Компонент</th>
+            <th>Име</th>
+            <th>Наличност</th>
+            <th>Харчене на ден</th>
+            <th>Ще стигне за</th>
+            <th>Поръчай</th>
+        </tr>
+        {% for r in rows %}
+        <tr {% if r.days_left < 14 %}class="low"{% endif %}>
+            <td>{{ r.part_number }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.quantity }}</td>
+            <td>{{ "%.1f"|format(r.per_day) }}</td>
+            <td>{{ "%.0f"|format(r.days_left) }} дни</td>
+            <td>{{ r.order_qty }} бр.</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
