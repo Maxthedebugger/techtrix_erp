@@ -75,5 +75,13 @@
         <tr><th>Общо</th><th>{{ "%.2f"|format(cost.total) }} €</th></tr>
     </table>
     <p>Продажна цена: {{ "%.2f"|format(product.sale_price) }} € · Печалба: {{ "%.2f"|format(product.sale_price - cost.total) }} €</p>
+    <form method="post" action="{{ url_for('product_price', product_id=product.id) }}">
+        <p>Нова продажна цена: <input type="number" name="sale_price" step="0.01" min="0.01" required> €
+        <button type="submit">Смени цената</button></p>
+    </form>
+    {% for msg in get_flashed_messages() %}
+        <p class="error">{{ msg }}</p>
+    {% endfor %}
+
     {% endif %}
 {% endblock %}
