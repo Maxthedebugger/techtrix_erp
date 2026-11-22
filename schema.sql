@@ -21,7 +21,8 @@ CREATE TABLE products (
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     quantity INTEGER NOT NULL DEFAULT 0 CHECK (quantity >= 0),
-    sale_price REAL CHECK(sale_price >= 0)
+    sale_price REAL CHECK(sale_price >= 0),
+    active INTEGER NOT NULL DEFAULT 1
 );
 CREATE TABLE bom_items (
     id INTEGER PRIMARY KEY,

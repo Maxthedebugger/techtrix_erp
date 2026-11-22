@@ -7,6 +7,7 @@ from services.recipes import set_bom_item
 from services.production import start_production, finish_order, cancel_order
 from services.forecast import forecast_component
 from services.sales import ship_sale, cancel_sale
+from services.products import add_product, remove_product
 
 app = Flask(__name__)
 
@@ -176,21 +177,37 @@ def change_password():
             message = "Паролата е сменена"
         conn.close()
     return render_template("change_password.html", error=error, message=message)
-@app.route("/products")
+@app.route("/products", methods=["GET", "POST"])
 def products():
     denied = require_role()
     if denied:
         return denied
     conn = get_db()
-    rows = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
-    conn.close()
-    return render_template("products.html", products=rows)
-    moves = conn.execute(
-        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id
-           FROM product_movements m
-           JOIN ___ p ON p.id = m.___
-           ORDER BY m.id DESC"""
+    if request.method == "POST":
+        if session["role"] != "director":
+            conn.close()
+            return "Нямате достъп", 403
+        try:
+            sale_price = float(request.form["sale_price"])
+            product_id = add_product(conn, request.form["code"], request.form["name"], sale_price)
+            conn.close()
+            flash("Продуктът е добавен. Сега добави рецептата и часовете.")
+            return redirect(url_for("product_detail", product_id=product_id))
+        except ValueError as e:
+            flash(str(e))
+            conn.close()
+            return redirect(url_for("products"))
+    rows = conn.execute("SELECT * FROM products WHERE active = 1 ORDER BY code").fetchall()
+    open_docs = conn.execute(
+        """SELECT product_id, COUNT(*) AS n FROM (
+               SELECT product_id FROM orders WHERE status = 'new'
+               UNION ALL
+               SELECT product_id FROM sales WHERE status = 'new')
+           GROUP BY product_id"""
     ).fetchall()
+    open_count = {d["product_id"]: d["n"] for d in open_docs}
+    conn.close()
+    return render_template("products.html", products=rows, open_count=open_count)
 @app.route("/products/<int:product_id>", methods=["GET", "POST"])
 def product_detail(product_id):
     denied = require_role()
@@ -229,7 +246,10 @@ def product_detail(product_id):
         cost = calc_cost(conn, product_id)
         all_components = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     conn.close()
-    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
+    all_processes = conn.execute("SELECT id, name, hourly_rate FROM processes ORDER BY id").fetchall()
+    conn.close()
+    return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost,
+                           all_components=all_components, all_processes=all_processes)
 
 
 @app.route("/orders", methods=["GET", "POST"])
@@ -258,7 +278,7 @@ def orders():
         JOIN products p ON o.product_id = p.id
         ORDER BY o.id DESC
     """).fetchall()
-    products = conn.execute("SELECT id, code, name FROM products ORDER BY code").fetchall()
+    products = conn.execute("SELECT id, code, name FROM products WHERE active = 1 ORDER BY code").fetchall()
     conn.close()
     return render_template("orders.html", orders=rows, products=products)
 
@@ -308,7 +328,7 @@ def report():
     if denied:
         return denied
     conn = get_db()
-    products = conn.execute("SELECT * FROM products ORDER BY code").fetchall()
+    products = conn.execute("SELECT * FROM products WHERE active = 1 ORDER BY code").fetchall()
     rows = []
     for p in products:
         cost = calc_cost(conn, p["id"])
@@ -368,8 +388,9 @@ def product_hours(product_id):
     conn = get_db()
     with conn:
         conn.execute(
-            "UPDATE product_processes SET hours = ? WHERE product_id = ? AND process_id = ?",
-            (hours, product_id, process_id),
+            """INSERT INTO product_processes (product_id, process_id, hours) VALUES (?, ?, ?)
+               ON CONFLICT (product_id, process_id) DO UPDATE SET hours = excluded.hours""",
+            (product_id, process_id, hours),
         )
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
@@ -399,7 +420,7 @@ def sales():
         JOIN products p ON s.product_id = p.id
         ORDER BY s.id DESC
     """).fetchall()
-    products = conn.execute("SELECT id, code, name, quantity FROM products ORDER BY code").fetchall()
+    products = conn.execute("SELECT id, code, name, quantity FROM products WHERE active = 1 ORDER BY code").fetchall()
     conn.close()
     return render_template("sales.html", sales=rows, products=products,)
 @app.route("/sales/<int:sale_id>/ship", methods=["POST"])
@@ -441,5 +462,18 @@ def component_remove(component_id):
         flash(str(e))
     conn.close()
     return redirect(url_for("components"))
+@app.route("/products/<int:product_id>/remove", methods=["POST"])
+def product_remove(product_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        remove_product(conn, product_id)
+        flash("Продуктът е премахнат")
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("products"))
 if __name__ == "__main__":
     app.run(debug=True)
