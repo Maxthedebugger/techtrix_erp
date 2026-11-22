@@ -6,6 +6,7 @@ from services.costing import calc_cost
 from services.recipes import set_bom_item
 from services.production import start_production, finish_order, cancel_order
 from services.forecast import forecast_component
+from services.sales import ship_sale, cancel_sale
 
 app = Flask(__name__)
 
@@ -334,5 +335,60 @@ def product_hours(product_id):
         )
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
+@app.route("/sales", methods=["GET", "POST"])
+def sales():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        if session["role"] != "director":
+            conn.close()
+            return "Нямате достъп", 403
+        customer = request.form["customer"]
+        product_id = int(request.form["product_id"])
+        quantity = int(request.form["quantity"])
+        with conn:
+            conn.execute(
+                "INSERT INTO sales (customer, product_id, quantity) VALUES (?, ?, ?)",
+                (customer, product_id, quantity),
+            )
+        conn.close()
+        return redirect(url_for("sales"))
+    rows = conn.execute("""
+        SELECT s.id, s.customer, p.code, s.quantity, p.quantity AS in_stock, s.status
+        FROM sales s
+        JOIN products p ON s.product_id = p.id
+        ORDER BY s.id DESC
+    """).fetchall()
+    products = conn.execute("SELECT id, code, name, quantity FROM products ORDER BY code").fetchall()
+    conn.close()
+    return render_template("sales.html", sales=rows, products=products,)
+@app.route("/sales/<int:sale_id>/ship", methods=["POST"])
+def sale_ship(sale_id):
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        ship_sale(conn, sale_id)
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("sales"))
+
+
+@app.route("/sales/<int:sale_id>/cancel", methods=["POST"])
+def sale_cancel(sale_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        cancel_sale(conn, sale_id)
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("sales"))
 if __name__ == "__main__":
     app.run(debug=True)

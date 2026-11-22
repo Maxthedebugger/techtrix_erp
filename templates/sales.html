@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Продажби · Techtrix ERP{% endblock %}
+{% block content %}
+    <h1>Продажби</h1>
+    {% for msg in get_flashed_messages() %}
+        <p class="error">{{ msg }}</p>
+    {% endfor %}
+
+    {% if session.role == "director" %}
+    <h2>Нова продажба</h2>
+    <form method="post">
+        <p>Клиент: <input type="text" name="customer" required></p>
+        <p>
+            Продукт:
+            <select name="product_id">
+                {% for p in products %}
+                <option value="{{ p.id }}">{{ p.code }} · {{ p.name }} (на склад {{ p.quantity }})</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p>Брой: <input type="number" name="quantity" min="1" required></p>
+        <button type="submit">Създай продажба</button>
+    </form>
+    {% endif %}
+
+    <h2>Всички продажби</h2>
+    <table>
+        <tr>
+            <th>№</th>
+            <th>Клиент</th>
+            <th>Продукт</th>
+            <th>Брой</th>
+            <th>На склад</th>
+            <th>Статус</th>
+            <th>Действие</th>
+        </tr>
+        {% for s in sales %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td>{{ s.customer }}</td>
+            <td>{{ s.code }}</td>
+            <td>{{ s.quantity }}</td>
+            <td>{{ s.in_stock }}</td>
+            <td>{{ s.status }}</td>
+            <td>
+                {% if s.status == "new" %}
+                <form method="post" action="{{ url_for('sale_ship', sale_id=s.id) }}">
+                    <button type="submit">Изпрати</button>
+                </form>
+                {% if session.role == "director" %}
+                <form method="post" action="{{ url_for('sale_cancel', sale_id=s.id) }}">
+                    <button type="submit">Откажи</button>
+                </form>
+                {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
