@@ -4,7 +4,7 @@ from database import get_db
 from services.inventory import receive_delivery, correct_stock
 from services.costing import calc_cost
 from services.recipes import set_bom_item
-from services.production import start_production, finish_order, ship_order, cancel_order
+from services.production import start_production, finish_order, cancel_order
 from services.forecast import forecast_component
 
 app = Flask(__name__)
@@ -203,19 +203,18 @@ def orders():
         if session["role"] != "director":
             conn.close()
             return "Нямате достъп", 403
-        customer = request.form["customer"]
         product_id = int(request.form["product_id"])
         quantity = int(request.form["quantity"])
         due_date = request.form["due_date"] or None
         with conn:
             conn.execute(
-                "INSERT INTO orders (customer, product_id, quantity, due_date) VALUES (?, ?, ?, ?)",
-                (customer, product_id, quantity, due_date)
+                "INSERT INTO orders (product_id, quantity, due_date) VALUES (?, ?, ?)",
+                (product_id, quantity, due_date)
             )
         conn.close()
         return redirect(url_for("orders"))
     rows = conn.execute("""
-        SELECT o.id, o.customer, p.code, o.quantity, o.due_date, o.status
+        SELECT o.id, p.code, o.quantity, o.due_date, o.status
         FROM orders o
         JOIN products p ON o.product_id = p.id
         ORDER BY o.id DESC
@@ -252,18 +251,6 @@ def order_finish(order_id):
     return redirect(url_for("orders"))
 
 
-@app.route("/orders/<int:order_id>/ship", methods=["POST"])
-def order_ship(order_id):
-    denied = require_role("director")
-    if denied:
-        return denied
-    conn = get_db()
-    try:
-        ship_order(conn, order_id)
-    except ValueError as e:
-        flash(str(e))
-    conn.close()
-    return redirect(url_for("orders"))
 @app.route("/orders/<int:order_id>/cancel", methods=["POST"])
 def order_cancel(order_id):
     denied = require_role("director")

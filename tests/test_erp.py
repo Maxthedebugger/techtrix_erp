@@ -8,7 +8,7 @@ import database
 from seed import seed
 from services.costing import calc_cost
 from services.inventory import correct_stock
-from services.production import start_production, finish_order, ship_order
+from services.production import start_production, finish_order
 from services.forecast import forecast_component
 
 
@@ -24,7 +24,7 @@ def conn(tmp_path, monkeypatch):
 def new_order(conn, product_id, quantity):
     with conn:
         cur = conn.execute(
-            "INSERT INTO orders (customer, product_id, quantity) VALUES ('Тест', ?, ?)",
+            "INSERT INTO orders (product_id, quantity) VALUES (?, ?)",
             (product_id, quantity),
         )
     return cur.lastrowid
@@ -52,10 +52,6 @@ def test_full_order_flow(conn):
     finish_order(conn, order_id)
     stock = conn.execute("SELECT quantity FROM products WHERE id = 1").fetchone()["quantity"]
     assert stock == 5
-    ship_order(conn, order_id)
-    status = conn.execute("SELECT status FROM orders WHERE id = ?", (order_id,)).fetchone()["status"]
-    assert status == "shipped"
-
 
 def test_forecast_finds_daily_usage(conn):
     with conn:

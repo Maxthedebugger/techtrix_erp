@@ -31,11 +31,10 @@ CREATE TABLE bom_items (
 );
 CREATE TABLE orders (
     id INTEGER PRIMARY KEY,
-    customer TEXT NOT NULL,
     product_id INTEGER REFERENCES products(id) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity  > 0),
     due_date TEXT,
-    status TEXT NOT NULL DEFAULT 'new' CHECK(status IN('new','in_production','done', 'shipped','cancelled')),
+    status TEXT NOT NULL DEFAULT 'new' CHECK(status IN('new','in_production','done','cancelled')),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE stock_movements (

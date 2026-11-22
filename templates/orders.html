@@ -2,7 +2,7 @@
 {% block title %}Поръчки · Techtrix ERP{% endblock %}
 {% block content %}
     
-<h1>Поръчки</h1>
+<h1>Поръчки за производство</h1>
     
 {% for msg in get_flashed_messages() %}
         
@@ -52,8 +52,6 @@
             
 <th>№</th>
             
-<th>Клиент</th>
-            
 <th>Продукт</th>
             
 <th>Брой</th>
@@ -71,8 +69,6 @@
 <tr>
             
 <td>{{ o.id }}</td>
-            
-<td>{{ o.customer }}</td>
             
 <td>{{ o.code }}</td>
             
@@ -109,15 +105,6 @@
                 
 {% endif %}
                 
-{% if o.status == "done" and session.role == "director" %}
-                
-<form method="post" action="{{ url_for('order_ship', order_id=o.id) }}">
-                    
-<button type="submit">Изпрати</button>
-                
-</form>
-                
-{% endif %}
             
 </td>
         
