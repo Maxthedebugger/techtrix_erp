@@ -3,6 +3,25 @@
 {% block content %}
     
 <h1>Дневник на движенията</h1>
+    <form method="get">
+        Код:
+        <select name="code">
+            <option value="">всички</option>
+            {% for c in codes %}
+            <option value="{{ c.code }}" {% if c.code == code %}selected{% endif %}>{{ c.code }}</option>
+            {% endfor %}
+        </select>
+        Причина:
+        <select name="reason">
+            <option value="">всички</option>
+            {% for r in reasons %}
+            <option value="{{ r.reason }}" {% if r.reason == reason %}selected{% endif %}>{{ r.reason }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Покажи</button>
+        <a href="{{ url_for('movements') }}">Изчисти</a>
+    </form>
+
     
 <table>
         

@@ -89,20 +89,44 @@ def movements():
     if denied:
         return denied
     conn = get_db()
-    rows = conn.execute(
-        """SELECT m.created_at, c.part_number, c.name, m.change, m.unit_price, m.reason
-           FROM stock_movements m
-           JOIN components c ON c.id = m.component_id
-           ORDER BY m.id DESC"""
+    code = request.args.get("code", "")
+    reason = request.args.get("reason", "")
+
+    sql = """SELECT m.created_at, c.part_number, c.name, m.change, m.unit_price, m.reason
+             FROM stock_movements m
+             JOIN components c ON c.id = m.component_id
+             WHERE 1 = 1"""
+    params = []
+    if code:
+        sql += " AND c.part_number = ?"
+        params.append(code)
+    if reason:
+        sql += " AND m.reason = ?"
+        params.append(reason)
+    rows = conn.execute(sql + " ORDER BY m.id DESC", params).fetchall()
+
+    sql = """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
+             FROM product_movements m
+             JOIN products p ON p.id = m.product_id
+             WHERE 1 = 1"""
+    params = []
+    if code:
+        sql += " AND p.code = ?"
+        params.append(code)
+    if reason:
+        sql += " AND m.reason = ?"
+        params.append(reason)
+    moves = conn.execute(sql + " ORDER BY m.id DESC", params).fetchall()
+
+    codes = conn.execute(
+        "SELECT part_number AS code FROM components UNION SELECT code FROM products ORDER BY code"
     ).fetchall()
-    moves = conn.execute(
-        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
-           FROM product_movements m
-           JOIN products p ON p.id = m.product_id
-           ORDER BY m.id DESC"""
+    reasons = conn.execute(
+        "SELECT reason FROM stock_movements UNION SELECT reason FROM product_movements ORDER BY reason"
     ).fetchall()
     conn.close()
-    return render_template("movements.html", movements=rows, moves=moves)
+    return render_template("movements.html", movements=rows, moves=moves,
+                           codes=codes, reasons=reasons, code=code, reason=reason)
 @app.route("/correction", methods=["GET", "POST"])
 def correction():
     denied = require_role("director", "warehouse")
