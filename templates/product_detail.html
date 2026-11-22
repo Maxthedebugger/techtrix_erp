@@ -22,6 +22,21 @@
 
     <h2>Процеси (часове за 1 брой)</h2>
     <table>
+    {% if session.role == "director" %}
+    <form method="post" action="{{ url_for('product_hours', product_id=product.id) }}">
+        <p>
+            Процес:
+            <select name="process_id">
+                {% for pr in processes %}
+                <option value="{{ pr.process_id }}">{{ pr.name }} ({{ pr.hours }} ч.)</option>
+                {% endfor %}
+            </select>
+            Нови часове: <input type="number" name="hours" step="0.01" min="0.01" required>
+            <button type="submit">Смени часовете</button>
+        </p>
+    </form>
+    {% endif %}
+
         <tr>
             <th>Процес</th>
             <th>Часове</th>
@@ -82,6 +97,5 @@
     {% for msg in get_flashed_messages() %}
         <p class="error">{{ msg }}</p>
     {% endfor %}
-
     {% endif %}
 {% endblock %}

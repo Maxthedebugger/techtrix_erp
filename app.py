@@ -179,7 +179,7 @@ def product_detail(product_id):
         ORDER BY c.part_number
     """, (product_id,)).fetchall()
     processes = conn.execute("""
-        SELECT pr.name, pp.hours
+        SELECT pp.process_id, pr.name, pp.hours
         FROM product_processes pp
         JOIN processes pr ON pp.process_id = pr.id
         WHERE pp.product_id = ?
@@ -324,6 +324,27 @@ def product_price(product_id):
     conn = get_db()
     with conn:
         conn.execute("UPDATE products SET sale_price = ? WHERE id = ?", (price, product_id))
+    conn.close()
+    return redirect(url_for("product_detail", product_id=product_id))
+@app.route("/products/<int:product_id>/hours", methods=["POST"])
+def product_hours(product_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    try:
+        process_id = int(request.form["process_id"])
+        hours = float(request.form["hours"])
+        if hours <= 0:
+            raise ValueError("Часовете трябва да са повече от 0")
+    except ValueError as e:
+        flash(str(e))
+        return redirect(url_for("product_detail", product_id=product_id))
+    conn = get_db()
+    with conn:
+        conn.execute(
+            "UPDATE product_processes SET hours = ? WHERE product_id = ? AND process_id = ?",
+            (hours, product_id, process_id),
+        )
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
 if __name__ == "__main__":
