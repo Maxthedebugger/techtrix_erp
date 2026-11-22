@@ -245,7 +245,6 @@ def product_detail(product_id):
     if session["role"] == "director":
         cost = calc_cost(conn, product_id)
         all_components = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
-    conn.close()
     all_processes = conn.execute("SELECT id, name, hourly_rate FROM processes ORDER BY id").fetchall()
     conn.close()
     return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost,

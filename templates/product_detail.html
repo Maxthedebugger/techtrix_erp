@@ -1,101 +1,50 @@
 {% extends "base.html" %}
-{% block title %}{{ product.code }} · Techtrix ERP{% endblock %}
+{% block title %}Продукти · Techtrix ERP{% endblock %}
 {% block content %}
-    <h1>{{ product.code }} · {{ product.name }}</h1>
-    <p><a href="{{ url_for('products') }}">← Всички продукти</a></p>
-
-    <h2>Рецепта (компоненти за 1 брой)</h2>
-    <table>
-        <tr>
-            <th>Код</th>
-            <th>Компонент</th>
-            <th>Брой</th>
-        </tr>
-        {% for b in bom %}
-        <tr>
-            <td>{{ b.part_number }}</td>
-            <td>{{ b.name }}</td>
-            <td>{{ b.quantity }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <h2>Процеси (часове за 1 брой)</h2>
-    <table>
-    {% if session.role == "director" %}
-    <form method="post" action="{{ url_for('product_hours', product_id=product.id) }}">
-        <p>
-            Процес:
-            <select name="process_id">
-                {% for pr in processes %}
-                <option value="{{ pr.process_id }}">{{ pr.name }} ({{ pr.hours }} ч.)</option>
-                {% endfor %}
-            </select>
-            Нови часове: <input type="number" name="hours" step="0.01" min="0.01" required>
-            <button type="submit">Смени часовете</button>
-        </p>
-    </form>
-    {% endif %}
-
-        <tr>
-            <th>Процес</th>
-            <th>Часове</th>
-        </tr>
-        {% for pr in processes %}
-        <tr>
-            <td>{{ pr.name }}</td>
-            <td>{{ pr.hours }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-        
-{% if session.role == "director" %}
-    
-<h2>Промяна на рецептата</h2>
-    
-<form method="post">
-        
-<p>
-            
-Компонент:
-            
-<select name="component_id">
-                
-{% for c in all_components %}
-                
-<option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
-                
-{% endfor %}
-            
-</select>
-        
-</p>
-        
-<p>Брой за 1 продукт: <input type="number" name="quantity" min="0" required></p>
-        
-<button type="submit">Запиши</button>
-    
-</form>
-    
-<p>Нов компонент се добавя. При съществуващ се сменя броят. Брой 0 го маха от рецептата.</p>
-    
-{% endif %}
-
-    {% if cost %}
-    <h2>Себестойност (за 1 брой)</h2>
-    <table>
-        <tr><td>Материали</td><td>{{ "%.2f"|format(cost.materials) }} €</td></tr>
-        <tr><td>Труд</td><td>{{ "%.2f"|format(cost.labor) }} €</td></tr>
-        <tr><td>Режийни</td><td>{{ "%.2f"|format(cost.overhead) }} €</td></tr>
-        <tr><th>Общо</th><th>{{ "%.2f"|format(cost.total) }} €</th></tr>
-    </table>
-    <p>Продажна цена: {{ "%.2f"|format(product.sale_price) }} € · Печалба: {{ "%.2f"|format(product.sale_price - cost.total) }} €</p>
-    <form method="post" action="{{ url_for('product_price', product_id=product.id) }}">
-        <p>Нова продажна цена: <input type="number" name="sale_price" step="0.01" min="0.01" required> €
-        <button type="submit">Смени цената</button></p>
-    </form>
+    <h1>Продукти</h1>
     {% for msg in get_flashed_messages() %}
         <p class="error">{{ msg }}</p>
     {% endfor %}
+
+    {% if session.role == "director" %}
+    <h2>Нов продукт</h2>
+    <form method="post">
+        <p>Код: <input type="text" name="code" required></p>
+        <p>Име: <input type="text" name="name" required></p>
+        <p>Продажна цена (€): <input type="number" name="sale_price" step="0.01" min="0.01" required></p>
+        <button type="submit">Добави продукт</button>
+    </form>
+    <p>След добавяне се отваря страницата на продукта. Там добави рецептата и часовете.</p>
     {% endif %}
+
+    <h2>Всички продукти</h2>
+    <table>
+        <tr>
+            <th>Код</th>
+            <th>Име</th>
+            <th>Наличност</th>
+            <th>Продажна цена (€)</th>
+            {% if session.role == "director" %}<th>Действие</th>{% endif %}
+        </tr>
+        {% for p in products %}
+        <tr>
+            <td><a href="{{ url_for('product_detail', product_id=p.id) }}">{{ p.code }}</a></td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ "%.2f"|format(p.sale_price) }}</td>
+            {% if session.role == "director" %}
+            <td>
+                {% set warning = "Наистина ли да премахна " ~ p.code ~ "? На склад има " ~ p.quantity ~ " бр." %}
+                {% if p.id in open_count %}
+                    {% set warning = warning ~ " Отворените поръчки и продажби за него (" ~ open_count[p.id] ~ ") ще бъдат отказани." %}
+                {% endif %}
+                <form method="post" action="{{ url_for('product_remove', product_id=p.id) }}"
+                      onsubmit="return confirm('{{ warning }}')">
+                    <button type="submit">Премахни</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
