@@ -50,7 +50,7 @@
             <th>Продукт</th>
             <th>Промяна</th>
             <th>Причина</th>
-            <th>Поръчка №</th>
+            <th>Документ</th>
         </tr>
         {% for m in moves %}
         <tr>
@@ -58,7 +58,7 @@
             <td>{{ m.code }}</td>
             <td>{{ m.change }}</td>
             <td>{{ m.reason }}</td>
-            <td>{{ m.order_id or "—" }}</td>
+            <td>{% if m.order_id %}Производство №{{ m.order_id }}{% elif m.sale_id %}Продажба №{{ m.sale_id }}{% else %}—{% endif %}</td>
         </tr>
         {% endfor %}
     </table>

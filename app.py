@@ -82,7 +82,7 @@ def movements():
            ORDER BY m.id DESC"""
     ).fetchall()
     moves = conn.execute(
-        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id
+        """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
            FROM product_movements m
            JOIN products p ON p.id = m.product_id
            ORDER BY m.id DESC"""

@@ -10,6 +10,7 @@ from services.costing import calc_cost
 from services.inventory import correct_stock
 from services.production import start_production, finish_order
 from services.forecast import forecast_component
+from services.sales import ship_sale
 
 
 @pytest.fixture
@@ -51,7 +52,14 @@ def test_full_order_flow(conn):
     start_production(conn, order_id)
     finish_order(conn, order_id)
     stock = conn.execute("SELECT quantity FROM products WHERE id = 1").fetchone()["quantity"]
-    assert stock == 5
+    with conn:
+        sale_id = conn.execute(
+            "INSERT INTO sales (customer, product_id, quantity) VALUES ('Тест', 1, 5)"
+        ).lastrowid
+    ship_sale(conn, sale_id)
+    stock = conn.execute("SELECT quantity FROM products WHERE id = 1").fetchone()["quantity"]
+    assert stock == 0
+    
 
 def test_forecast_finds_daily_usage(conn):
     with conn:
