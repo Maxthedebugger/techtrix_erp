@@ -39,7 +39,10 @@ def login():
             return redirect(url_for("index"))
         return "Грешно име или парола"
     return render_template("login.html")
-
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 @app.route("/components", methods=["GET", "POST"])
 def components():
     denied = require_role("director", "warehouse")
@@ -297,7 +300,7 @@ def forecast():
     if denied:
         return denied
     conn = get_db()
-    components = conn.execute("FROM components WHERE active = 1 ORDER BY").fetchall()
+    components = conn.execute("SELECT * FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     rows = []
     for c in components:
         f = forecast_component(conn, c["id"])
