@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
-from services.inventory import receive_delivery, correct_stock
+from services.inventory import receive_delivery, correct_stock, add_component, remove_component
 from services.costing import calc_cost
 from services.recipes import set_bom_item
 from services.production import start_production, finish_order, cancel_order
@@ -40,19 +40,30 @@ def login():
         return "Грешно име или парола"
     return render_template("login.html")
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-@app.route("/components")
+@app.route("/components", methods=["GET", "POST"])
 def components():
     denied = require_role("director", "warehouse")
     if denied:
         return denied
     conn = get_db()
-    rows = conn.execute("SELECT * FROM components ORDER BY part_number").fetchall()
+    if request.method == "POST":
+        try:
+            min_quantity = int(request.form["min_quantity"])
+            add_component(conn, request.form["part_number"], request.form["name"],
+                          request.form["type"], min_quantity, request.form["supplier"])
+        except ValueError as e:
+            flash(str(e))
+        conn.close()
+        return redirect(url_for("components"))
+    rows = conn.execute("SELECT * FROM components WHERE active = 1 ORDER BY part_number").fetchall()
+    used = conn.execute(
+        """SELECT b.component_id, GROUP_CONCAT(p.code, ', ') AS codes
+           FROM bom_items b JOIN products p ON p.id = b.product_id
+           GROUP BY b.component_id"""
+    ).fetchall()
+    used_in = {u["component_id"]: u["codes"] for u in used}
     conn.close()
-    return render_template("components.html", components=rows)
+    return render_template("components.html", components=rows, used_in=used_in)
 @app.route("/delivery", methods=["GET", "POST"])
 def delivery():
     denied = require_role("director", "warehouse")
@@ -66,7 +77,7 @@ def delivery():
         receive_delivery(conn, component_id, qty, unit_price)
         conn.close()
         return redirect(url_for("components"))
-    rows = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
+    rows = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     conn.close()
     return render_template("delivery.html", components=rows)
 @app.route("/movements")
@@ -105,7 +116,7 @@ def correction():
             return redirect(url_for("components"))
         except ValueError as e:
             error = str(e)
-    rows = conn.execute("SELECT id, part_number, name, quantity FROM components ORDER BY part_number").fetchall()
+    rows = conn.execute("SELECT id, part_number, name, quantity FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     conn.close()
     return render_template("correction.html", components=rows, error=error)
 @app.route("/change-password", methods=["GET", "POST"])
@@ -189,7 +200,7 @@ def product_detail(product_id):
     all_components = []
     if session["role"] == "director":
         cost = calc_cost(conn, product_id)
-        all_components = conn.execute("SELECT id, part_number, name FROM components ORDER BY part_number").fetchall()
+        all_components = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     conn.close()
     return render_template("product_detail.html", product=product, bom=bom, processes=processes, cost=cost, all_components=all_components)
 
@@ -286,7 +297,7 @@ def forecast():
     if denied:
         return denied
     conn = get_db()
-    components = conn.execute("SELECT * FROM components ORDER BY part_number").fetchall()
+    components = conn.execute("FROM components WHERE active = 1 ORDER BY").fetchall()
     rows = []
     for c in components:
         f = forecast_component(conn, c["id"])
@@ -390,5 +401,18 @@ def sale_cancel(sale_id):
         flash(str(e))
     conn.close()
     return redirect(url_for("sales"))
+@app.route("/components/<int:component_id>/remove", methods=["POST"])
+def component_remove(component_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        remove_component(conn, component_id)
+        flash("Компонентът е премахнат")
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("components"))
 if __name__ == "__main__":
     app.run(debug=True)

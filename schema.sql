@@ -13,7 +13,8 @@ CREATE TABLE components (
     quantity INTEGER  NOT NULL DEFAULT 0 CHECK (quantity >= 0),
     min_quantity INTEGER CHECK (min_quantity >= 0),
     price REAL CHECK (price >= 0),
-    supplier TEXT
+    supplier TEXT,
+    active INTEGER NOT NULL DEFAULT 1
 );
 CREATE TABLE products (
     id INTEGER PRIMARY KEY,

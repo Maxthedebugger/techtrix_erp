@@ -1,47 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Склад · Techtrix ERP{% endblock %}
 {% block content %}
-    
-<h1>Склад: компоненти</h1>
-    
-<p><a href="{{ url_for('delivery') }}">+ Нова доставка</a> · <a href="{{ url_for('correction') }}">Корекция</a></p>
-    
-<table>
-        
-<tr>
-            
-<th>Код</th>
-            
-<th>Име</th>
-            
-<th>Тип</th>
-            
-<th>Количество</th>
-            
-<th>Минимум</th>
-            
-<th>Цена (€)</th>
-        
-</tr>
-        
-{% for c in components %}
-<tr {% if c.quantity < c.min_quantity %}class="low"{% endif %}>
-            
-<td>{{ c.part_number }}</td>
-            
-<td>{{ c.name }}</td>
-            
-<td>{{ c.type }}</td>
-            
-<td>{{ c.quantity }}</td>
-            
-<td>{{ c.min_quantity }}</td>
-            
-<td>{{ "%.2f"|format(c.price) }}</td>
-        
-</tr>
-        
-{% endfor %}
-    
-</table>
+    <h1>Склад: компоненти</h1>
+    {% for msg in get_flashed_messages() %}
+        <p class="error">{{ msg }}</p>
+    {% endfor %}
+    <p><a href="{{ url_for('delivery') }}">+ Нова доставка</a> · <a href="{{ url_for('correction') }}">Корекция</a></p>
+
+    <h2>Нов компонент</h2>
+    <form method="post">
+        <p>Код: <input type="text" name="part_number" required></p>
+        <p>Име: <input type="text" name="name" required></p>
+        <p>Тип: <input type="text" name="type"></p>
+        <p>Минимум: <input type="number" name="min_quantity" min="0" value="0" required></p>
+        <p>Доставчик: <input type="text" name="supplier"></p>
+        <button type="submit">Добави компонент</button>
+    </form>
+
+    <h2>Всички компоненти</h2>
+    <table>
+        <tr>
+            <th>Код</th>
+            <th>Име</th>
+            <th>Тип</th>
+            <th>Количество</th>
+            <th>Минимум</th>
+            <th>Цена (€)</th>
+            <th>В рецепти</th>
+            {% if session.role == "director" %}<th>Действие</th>{% endif %}
+        </tr>
+        {% for c in components %}
+        <tr {% if c.quantity < c.min_quantity %}class="low"{% endif %}>
+            <td>{{ c.part_number }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.type }}</td>
+            <td>{{ c.quantity }}</td>
+            <td>{{ c.min_quantity }}</td>
+            <td>{{ "%.2f"|format(c.price) }}</td>
+            <td>{{ used_in.get(c.id, "") }}</td>
+            {% if session.role == "director" %}
+            <td>
+                {% if c.id in used_in %}
+                    {% set warning = "Наистина ли да премахна " ~ c.part_number ~ "? Той ще бъде махнат и от рецептите на " ~ used_in[c.id] ~ "." %}
+                {% else %}
+                    {% set warning = "Наистина ли да премахна " ~ c.part_number ~ "?" %}
+                {% endif %}
+                <form method="post" action="{{ url_for('component_remove', component_id=c.id) }}"
+                      onsubmit="return confirm('{{ warning }}')">
+                    <button type="submit">Премахни</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
