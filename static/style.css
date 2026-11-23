@@ -67,3 +67,16 @@ dialog {
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.4);
 }
+main a {
+    display: inline-block;
+    padding: 1px 6px;
+    border: 1px solid #767676;
+    border-radius: 3px;
+    background: #efefef;
+    color: black;
+    font-size: 13.33px;
+    text-decoration: none;
+}
+main a:hover {
+    background: #e3e3e3;
+}
