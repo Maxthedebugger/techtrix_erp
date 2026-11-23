@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
 from services.inventory import receive_delivery, correct_stock, add_component, remove_component
 from services.costing import calc_cost
-from services.recipes import set_bom_item
+from services.recipes import set_bom_item, import_bom
 from services.production import start_production, finish_order, cancel_order
 from services.forecast import forecast_component
 from services.sales import ship_sale, cancel_sale
