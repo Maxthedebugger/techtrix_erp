@@ -2,10 +2,66 @@
 {% block title %}{{ product.code }} · Techtrix ERP{% endblock %}
 {% block content %}
     <h1>{{ product.code }} · {{ product.name }}</h1>
-    <p><a href="{{ url_for('products') }}">← Всички продукти</a></p>
+    <p>
+        <a href="{{ url_for('products') }}">← Всички продукти</a>
+        {% if session.role == "director" %}
+        <button type="button" onclick="document.getElementById('edit-bom').showModal()">Промяна на рецептата</button>
+        <button type="button" onclick="document.getElementById('import-bom').showModal()">Импорт на рецепта от файл</button>
+        <button type="button" onclick="document.getElementById('edit-process').showModal()">Промяна на процесите</button>
+        {% endif %}
+    </p>
     {% for msg in get_flashed_messages() %}
         <p class="error">{{ msg }}</p>
     {% endfor %}
+
+    {% if session.role == "director" %}
+    <dialog id="edit-bom">
+        <h2>Промяна на рецептата</h2>
+        <form method="post">
+            <p>
+                Компонент:
+                <select name="component_id">
+                    {% for c in all_components %}
+                    <option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Брой за 1 продукт: <input type="number" name="quantity" min="0" required></p>
+            <p>Нов компонент се добавя. При съществуващ се сменя броят. Брой 0 го маха от рецептата.</p>
+            <button type="submit">Запиши</button>
+            <button type="button" onclick="document.getElementById('edit-bom').close()">Отказ</button>
+        </form>
+    </dialog>
+
+    <dialog id="import-bom">
+        <h2>Импорт на рецепта</h2>
+        <p>Текстов файл (.txt или .csv), по един компонент на ред: <code>КОД;БРОЙ;ИМЕ</code></p>
+        <p>Името е по желание и се ползва само ако компонентът е нов. Редове с # отпред се прескачат.</p>
+        <p>Внимание: импортът <b>заменя</b> цялата рецепта на продукта.</p>
+        <form method="post" action="{{ url_for('product_import', product_id=product.id) }}" enctype="multipart/form-data">
+            <p><input type="file" name="bom_file" accept=".txt,.csv" required></p>
+            <button type="submit">Импортирай</button>
+            <button type="button" onclick="document.getElementById('import-bom').close()">Отказ</button>
+        </form>
+    </dialog>
+
+    <dialog id="edit-process">
+        <h2>Промяна на процесите</h2>
+        <form method="post" action="{{ url_for('product_hours', product_id=product.id) }}">
+            <p>
+                Процес:
+                <select name="process_id">
+                    {% for pr in all_processes %}
+                    <option value="{{ pr.id }}">{{ pr.name }} ({{ "%.2f"|format(pr.hourly_rate) }} €/ч)</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Минути за 1 брой: <input type="number" name="minutes" step="0.1" min="0.1" required></p>
+            <button type="submit">Запиши минутите</button>
+            <button type="button" onclick="document.getElementById('edit-process').close()">Отказ</button>
+        </form>
+    </dialog>
+    {% endif %}
 
     <h2>Рецепта (компоненти за 1 брой)</h2>
     <table>
@@ -39,21 +95,6 @@
 
     <h2>Процеси (минути за 1 брой)</h2>
     <table>
-    {% if session.role == "director" %}
-    <form method="post" action="{{ url_for('product_hours', product_id=product.id) }}">
-        <p>
-            Процес:
-            <select name="process_id">
-                {% for pr in all_processes %}
-                <option value="{{ pr.id }}">{{ pr.name }} ({{ "%.2f"|format(pr.hourly_rate) }} €/ч)</option>
-                {% endfor %}
-            </select>
-            Минути: <input type="number" name="minutes" step="0.1" min="0.1" required>
-            <button type="submit">Запиши минутите</button>
-        </p>
-    </form>
-    {% endif %}
-
         <tr>
             <th>Процес</th>
             <th>Минути</th>
@@ -65,51 +106,6 @@
         </tr>
         {% endfor %}
     </table>
-        
-{% if session.role == "director" %}
-    
-<h2>Промяна на рецептата</h2>
-    
-<form method="post">
-        
-<p>
-            
-Компонент:
-            
-<select name="component_id">
-                
-{% for c in all_components %}
-                
-<option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
-                
-{% endfor %}
-            
-</select>
-        
-</p>
-        
-<p>Брой за 1 продукт: <input type="number" name="quantity" min="0" required></p>
-        
-<button type="submit">Запиши</button>
-    
-</form>
-    
-<p>Нов компонент се добавя. При съществуващ се сменя броят. Брой 0 го маха от рецептата.</p>
-    <p><button type="button" onclick="document.getElementById('import-bom').showModal()">Импорт на рецепта от файл</button></p>
-    <dialog id="import-bom">
-        <h2>Импорт на рецепта</h2>
-        <p>Текстов файл (.txt или .csv), по един компонент на ред: <code>КОД;БРОЙ;ИМЕ</code></p>
-        <p>Името е по желание и се ползва само ако компонентът е нов. Редове с # отпред се прескачат.</p>
-        <p>Внимание: импортът <b>заменя</b> цялата рецепта на продукта.</p>
-        <form method="post" action="{{ url_for('product_import', product_id=product.id) }}" enctype="multipart/form-data">
-            <p><input type="file" name="bom_file" accept=".txt,.csv" required></p>
-            <button type="submit">Импортирай</button>
-            <button type="button" onclick="document.getElementById('import-bom').close()">Отказ</button>
-        </form>
-    </dialog>
-
-    
-{% endif %}
 
     {% if cost %}
     <h2>Себестойност (за 1 брой)</h2>
