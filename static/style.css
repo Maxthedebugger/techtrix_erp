@@ -80,3 +80,7 @@ main a {
 main a:hover {
     background: #e3e3e3;
 }
+main td a,
+main td a:hover {
+    all: revert;
+}
