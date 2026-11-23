@@ -387,6 +387,32 @@ def product_price(product_id):
         conn.execute("UPDATE products SET sale_price = ? WHERE id = ?", (price, product_id))
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
+@app.route("/products/<int:product_id>/import", methods=["POST"])
+def product_import(product_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    file = request.files.get("bom_file")
+    if file is None or file.filename == "":
+        flash("Не е избран файл")
+        return redirect(url_for("product_detail", product_id=product_id))
+    try:
+        text = file.read().decode("utf-8-sig")
+    except UnicodeDecodeError:
+        flash("Файлът трябва да е текстов (UTF-8)")
+        return redirect(url_for("product_detail", product_id=product_id))
+    conn = get_db()
+    try:
+        count, created = import_bom(conn, product_id, text)
+        message = f"Рецептата е заредена. Редове в нея: {count}."
+        if created:
+            message += " Нови компоненти в склада (с количество 0): " + ", ".join(created)
+        flash(message)
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("product_detail", product_id=product_id))
+
 @app.route("/products/<int:product_id>/hours", methods=["POST"])
 def product_hours(product_id):
     denied = require_role("director")

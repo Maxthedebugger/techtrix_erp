@@ -81,6 +81,19 @@
 </form>
     
 <p>Нов компонент се добавя. При съществуващ се сменя броят. Брой 0 го маха от рецептата.</p>
+    <p><button type="button" onclick="document.getElementById('import-bom').showModal()">Импорт на рецепта от файл</button></p>
+    <dialog id="import-bom">
+        <h2>Импорт на рецепта</h2>
+        <p>Текстов файл (.txt или .csv), по един компонент на ред: <code>КОД;БРОЙ;ИМЕ</code></p>
+        <p>Името е по желание и се ползва само ако компонентът е нов. Редове с # отпред се прескачат.</p>
+        <p>Внимание: импортът <b>заменя</b> цялата рецепта на продукта.</p>
+        <form method="post" action="{{ url_for('product_import', product_id=product.id) }}" enctype="multipart/form-data">
+            <p><input type="file" name="bom_file" accept=".txt,.csv" required></p>
+            <button type="submit">Импортирай</button>
+            <button type="button" onclick="document.getElementById('import-bom').close()">Отказ</button>
+        </form>
+    </dialog>
+
     
 {% endif %}
 
