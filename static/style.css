@@ -23,9 +23,8 @@ header span {
 }
 
 main {
-    max-width: 900px;
-    margin: 24px auto;
-    padding: 0 16px;
+    margin: 24px 0;
+    padding: 0 24px;
 }
 
 table {
