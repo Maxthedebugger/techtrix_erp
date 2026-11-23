@@ -244,7 +244,7 @@ def product_detail(product_id):
         conn.close()
         return redirect(url_for("product_detail", product_id=product_id))
     bom = conn.execute("""
-        SELECT c.part_number, c.name, b.quantity
+        SELECT c.part_number, c.name, b.quantity, c.price
         FROM bom_items b
         JOIN components c ON b.component_id = c.id
         WHERE b.product_id = ?

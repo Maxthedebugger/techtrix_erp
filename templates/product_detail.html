@@ -13,14 +13,28 @@
             <th>Код</th>
             <th>Компонент</th>
             <th>Брой</th>
+            {% if session.role == "director" %}
+            <th>Цена за брой (€)</th>
+            <th>Общо (€)</th>
+            {% endif %}
         </tr>
         {% for b in bom %}
         <tr>
             <td>{{ b.part_number }}</td>
             <td>{{ b.name }}</td>
             <td>{{ b.quantity }}</td>
+            {% if session.role == "director" %}
+            <td>{{ "%.2f"|format(b.price) }}</td>
+            <td>{{ "%.2f"|format(b.price * b.quantity) }}</td>
+            {% endif %}
         </tr>
         {% endfor %}
+        {% if session.role == "director" %}
+        <tr>
+            <th colspan="4">Общо материали</th>
+            <th>{{ "%.2f"|format(cost.materials) }}</th>
+        </tr>
+        {% endif %}
     </table>
 
     <h2>Процеси (минути за 1 брой)</h2>
