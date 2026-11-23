@@ -89,59 +89,53 @@ def movements():
     denied = require_role("director", "warehouse")
     if denied:
         return denied
-    conn = get_db()
+    view = request.args.get("view", "components")
+    if view not in ("components", "products"):
+        view = "components"
     code = request.args.get("code", "")
     reason = request.args.get("reason", "")
+    per_page = request.args.get("per_page", 25, type=int)
+    if per_page not in (25, 50, 100):
+        per_page = 25
 
-    sql = """SELECT m.created_at, c.part_number, c.name, m.change, m.unit_price, m.reason
-             FROM stock_movements m
-             JOIN components c ON c.id = m.component_id
-             WHERE 1 = 1"""
+    if view == "components":
+        sql = """SELECT m.created_at, c.part_number AS code, c.name, m.change, m.unit_price, m.reason
+                 FROM stock_movements m
+                 JOIN components c ON c.id = m.component_id
+                 WHERE 1 = 1"""
+        code_column = "c.part_number"
+        codes_sql = "SELECT part_number AS code FROM components ORDER BY part_number"
+        reasons_sql = "SELECT DISTINCT reason FROM stock_movements ORDER BY reason"
+    else:
+        sql = """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
+                 FROM product_movements m
+                 JOIN products p ON p.id = m.product_id
+                 WHERE 1 = 1"""
+        code_column = "p.code"
+        codes_sql = "SELECT code FROM products ORDER BY code"
+        reasons_sql = "SELECT DISTINCT reason FROM product_movements ORDER BY reason"
+
     params = []
     if code:
-        sql += " AND c.part_number = ?"
+        sql += " AND " + code_column + " = ?"
         params.append(code)
     if reason:
         sql += " AND m.reason = ?"
         params.append(reason)
-    per_page = request.args.get("per_page", 25, type=int)
-    if per_page not in (25, 50, 100):
-        per_page = 25
+
+    conn = get_db()
     total = conn.execute("SELECT COUNT(*) FROM (" + sql + ")", params).fetchone()[0]
     pages = max(1, (total + per_page - 1) // per_page)
     page = request.args.get("page", 1, type=int)
     page = min(max(page, 1), pages)
     offset = (page - 1) * per_page
     rows = conn.execute(sql + " ORDER BY m.id DESC LIMIT ? OFFSET ?", params + [per_page, offset]).fetchall()
-    sql = """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
-             FROM product_movements m
-             JOIN products p ON p.id = m.product_id
-             WHERE 1 = 1"""
-    params = []
-    if code:
-        sql += " AND p.code = ?"
-        params.append(code)
-    if reason:
-        sql += " AND m.reason = ?"
-        params.append(reason)
-    ptotal = conn.execute("SELECT COUNT(*) FROM (" + sql + ")", params).fetchone()[0]
-    ppages = max(1, (ptotal + per_page - 1) // per_page)
-    ppage = request.args.get("ppage", 1, type=int)
-    ppage = min(max(ppage, 1), ppages)
-    poffset = (ppage - 1) * per_page
-    moves = conn.execute(sql + " ORDER BY m.id DESC LIMIT ? OFFSET ?", params + [per_page, poffset]).fetchall()
-
-    codes = conn.execute(
-        "SELECT part_number AS code FROM components UNION SELECT code FROM products ORDER BY code"
-    ).fetchall()
-    reasons = conn.execute(
-        "SELECT reason FROM stock_movements UNION SELECT reason FROM product_movements ORDER BY reason"
-    ).fetchall()
+    codes = conn.execute(codes_sql).fetchall()
+    reasons = conn.execute(reasons_sql).fetchall()
     conn.close()
-    return render_template("movements.html", movements=rows, moves=moves,
-                           codes=codes, reasons=reasons, code=code, reason=reason,
-                           page=page, pages=pages, per_page=per_page, total=total,
-                           ppage=ppage, ppages=ppages, ptotal=ptotal)
+    return render_template("movements.html", view=view, rows=rows, codes=codes, reasons=reasons,
+                           code=code, reason=reason, page=page, pages=pages, per_page=per_page, total=total)
+
 @app.route("/correction", methods=["GET", "POST"])
 def correction():
     denied = require_role("director", "warehouse")

@@ -24,7 +24,14 @@
                     
 <a href="{{ url_for('components') }}">Склад</a>
                     
-<a href="{{ url_for('movements') }}">Движения</a>
+<span class="dropdown">
+    <a href="{{ url_for('movements') }}">Движения ▾</a>
+    <span class="dropdown-menu">
+        <a href="{{ url_for('movements', view='components') }}">Компоненти</a>
+        <a href="{{ url_for('movements', view='products') }}">Продукти</a>
+    </span>
+</span>
+
 <a href="{{ url_for('forecast') }}">AI прогноза</a>       
 {% endif %}
                 

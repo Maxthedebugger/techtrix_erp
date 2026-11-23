@@ -83,3 +83,52 @@ main td a,
 main td a:hover {
     all: revert;
 }
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    padding-top: 12px;
+    min-width: 160px;
+    z-index: 10;
+}
+.dropdown-menu a {
+    display: block;
+    padding: 8px 12px;
+    background: #1f3b57;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+}
+.dropdown-menu a:hover {
+    background: #2c5378;
+}
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+    display: block;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #1f3b57;
+    margin-bottom: 12px;
+}
+main .tabs a.tab {
+    padding: 7px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: #e8eef4;
+    color: #555;
+}
+main .tabs a.tab.active {
+    background: #1f3b57;
+    border-color: #1f3b57;
+    color: white;
+}

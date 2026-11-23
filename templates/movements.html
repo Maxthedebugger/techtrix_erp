@@ -1,10 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Движения · Techtrix ERP{% endblock %}
 {% block content %}
-    
-<h1>Дневник на движенията</h1>
+    <h1>Дневник на движенията</h1>
+
+    <div class="tabs">
+        <a href="{{ url_for('movements', view='components') }}" class="tab {% if view == 'components' %}active{% endif %}">Компоненти</a>
+        <a href="{{ url_for('movements', view='products') }}" class="tab {% if view == 'products' %}active{% endif %}">Продукти</a>
+    </div>
+
     <form method="get">
-        Код:
+        <input type="hidden" name="view" value="{{ view }}">
+        {% if view == "products" %}Продукт:{% else %}Код:{% endif %}
         <select name="code">
             <option value="">всички</option>
             {% for c in codes %}
@@ -25,60 +31,30 @@
             {% endfor %}
         </select>
         <button type="submit">Покажи</button>
-        <a href="{{ url_for('movements') }}">Изчисти</a>
+        <a href="{{ url_for('movements', view=view) }}">Изчисти</a>
     </form>
 
-    
-<table>
-        
-<tr>
-            
-<th>Дата</th>
-            
-<th>Код</th>
-            
-<th>Компонент</th>
-            
-<th>Промяна</th>
-            
-<th>Цена (€)</th>
-            
-<th>Причина</th>
-        
-</tr>
-        
-{% for m in movements %}
-        
-<tr>
-            
-<td>{{ m.created_at }}</td>
-            
-<td>{{ m.part_number }}</td>
-            
-<td>{{ m.name }}</td>
-            
-<td>{{ "%+d"|format(m.change) }}</td>
-            
-<td>{% if m.unit_price %}{{ "%.2f"|format(m.unit_price) }}{% endif %}</td>
-            
-<td>{{ m.reason }}</td>
-        
-</tr>
-        
-{% endfor %}
-    
-</table>
-    <p>
-        {% if page > 1 %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, ppage=ppage, page=page - 1) }}">← Предишна</a>
-        {% endif %}
-        Страница {{ page }} от {{ pages }} (общо {{ total }} движения)
-        {% if page < pages %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, ppage=ppage, page=page + 1) }}">Следваща →</a>
-        {% endif %}
-    </p>
-    <h2>Движение на продуктите</h2>
     <table>
+        {% if view == "components" %}
+        <tr>
+            <th>Дата</th>
+            <th>Код</th>
+            <th>Компонент</th>
+            <th>Промяна</th>
+            <th>Цена (€)</th>
+            <th>Причина</th>
+        </tr>
+        {% for m in rows %}
+        <tr>
+            <td>{{ m.created_at }}</td>
+            <td>{{ m.code }}</td>
+            <td>{{ m.name }}</td>
+            <td>{{ "%+d"|format(m.change) }}</td>
+            <td>{% if m.unit_price %}{{ "%.2f"|format(m.unit_price) }}{% endif %}</td>
+            <td>{{ m.reason }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
         <tr>
             <th>Дата</th>
             <th>Продукт</th>
@@ -86,23 +62,25 @@
             <th>Причина</th>
             <th>Документ</th>
         </tr>
-        {% for m in moves %}
+        {% for m in rows %}
         <tr>
             <td>{{ m.created_at }}</td>
             <td>{{ m.code }}</td>
-            <td>{{ m.change }}</td>
+            <td>{{ "%+d"|format(m.change) }}</td>
             <td>{{ m.reason }}</td>
             <td>{% if m.order_id %}Производство №{{ m.order_id }}{% elif m.sale_id %}Продажба №{{ m.sale_id }}{% else %}—{% endif %}</td>
         </tr>
         {% endfor %}
-    </table>
-    <p>
-        {% if ppage > 1 %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page, ppage=ppage - 1) }}">← Предишна</a>
         {% endif %}
-        Страница {{ ppage }} от {{ ppages }} (общо {{ ptotal }} движения)
-        {% if ppage < ppages %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page, ppage=ppage + 1) }}">Следваща →</a>
+    </table>
+
+    <p>
+        {% if page > 1 %}
+        <a href="{{ url_for('movements', view=view, code=code, reason=reason, per_page=per_page, page=page - 1) }}">← Предишна</a>
+        {% endif %}
+        Страница {{ page }} от {{ pages }} (общо {{ total }} движения)
+        {% if page < pages %}
+        <a href="{{ url_for('movements', view=view, code=code, reason=reason, per_page=per_page, page=page + 1) }}">Следваща →</a>
         {% endif %}
     </p>
 {% endblock %}
