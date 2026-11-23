@@ -124,7 +124,12 @@ def movements():
     if reason:
         sql += " AND m.reason = ?"
         params.append(reason)
-    moves = conn.execute(sql + " ORDER BY m.id DESC", params).fetchall()
+    ptotal = conn.execute("SELECT COUNT(*) FROM (" + sql + ")", params).fetchone()[0]
+    ppages = max(1, (ptotal + per_page - 1) // per_page)
+    ppage = request.args.get("ppage", 1, type=int)
+    ppage = min(max(ppage, 1), ppages)
+    poffset = (ppage - 1) * per_page
+    moves = conn.execute(sql + " ORDER BY m.id DESC LIMIT ? OFFSET ?", params + [per_page, poffset]).fetchall()
 
     codes = conn.execute(
         "SELECT part_number AS code FROM components UNION SELECT code FROM products ORDER BY code"
@@ -135,7 +140,8 @@ def movements():
     conn.close()
     return render_template("movements.html", movements=rows, moves=moves,
                            codes=codes, reasons=reasons, code=code, reason=reason,
-                           page=page, pages=pages, per_page=per_page, total=total)
+                           page=page, pages=pages, per_page=per_page, total=total,
+                           ppage=ppage, ppages=ppages, ptotal=ptotal)
 @app.route("/correction", methods=["GET", "POST"])
 def correction():
     denied = require_role("director", "warehouse")

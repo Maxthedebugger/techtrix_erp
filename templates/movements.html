@@ -70,11 +70,11 @@
 </table>
     <p>
         {% if page > 1 %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page - 1) }}">← Предишна</a>
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, ppage=ppage, page=page - 1) }}">← Предишна</a>
         {% endif %}
         Страница {{ page }} от {{ pages }} (общо {{ total }} движения)
         {% if page < pages %}
-        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page + 1) }}">Следваща →</a>
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, ppage=ppage, page=page + 1) }}">Следваща →</a>
         {% endif %}
     </p>
     <h2>Движение на продуктите</h2>
@@ -96,4 +96,13 @@
         </tr>
         {% endfor %}
     </table>
+    <p>
+        {% if ppage > 1 %}
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page, ppage=ppage - 1) }}">← Предишна</a>
+        {% endif %}
+        Страница {{ ppage }} от {{ ppages }} (общо {{ ptotal }} движения)
+        {% if ppage < ppages %}
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page, ppage=ppage + 1) }}">Следваща →</a>
+        {% endif %}
+    </p>
 {% endblock %}
