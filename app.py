@@ -394,9 +394,10 @@ def product_hours(product_id):
         return denied
     try:
         process_id = int(request.form["process_id"])
-        hours = float(request.form["hours"])
-        if hours <= 0:
-            raise ValueError("Часовете трябва да са повече от 0")
+        minutes = float(request.form["minutes"])
+        if minutes <= 0:
+            raise ValueError("Минутите трябва да са повече от 0")
+        hours = minutes / 60
     except ValueError as e:
         flash(str(e))
         return redirect(url_for("product_detail", product_id=product_id))

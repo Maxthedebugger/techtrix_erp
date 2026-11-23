@@ -23,7 +23,7 @@
         {% endfor %}
     </table>
 
-    <h2>Процеси (часове за 1 брой)</h2>
+    <h2>Процеси (минути за 1 брой)</h2>
     <table>
     {% if session.role == "director" %}
     <form method="post" action="{{ url_for('product_hours', product_id=product.id) }}">
@@ -34,20 +34,20 @@
                 <option value="{{ pr.id }}">{{ pr.name }} ({{ "%.2f"|format(pr.hourly_rate) }} €/ч)</option>
                 {% endfor %}
             </select>
-            Нови часове: <input type="number" name="hours" step="0.01" min="0.01" required>
-            <button type="submit">Запиши часовете</button>
+            Минути: <input type="number" name="minutes" step="0.1" min="0.1" required>
+            <button type="submit">Запиши минутите</button>
         </p>
     </form>
     {% endif %}
 
         <tr>
             <th>Процес</th>
-            <th>Часове</th>
+            <th>Минути</th>
         </tr>
         {% for pr in processes %}
         <tr>
             <td>{{ pr.name }}</td>
-            <td>{{ pr.hours }}</td>
+            <td>{{ "%g"|format(pr.hours * 60) }}</td>
         </tr>
         {% endfor %}
     </table>
