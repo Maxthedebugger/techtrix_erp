@@ -5,17 +5,61 @@
     {% for msg in get_flashed_messages() %}
         <p class="error">{{ msg }}</p>
     {% endfor %}
-    <p><a href="{{ url_for('delivery') }}">+ Нова доставка</a> · <a href="{{ url_for('correction') }}">Корекция</a></p>
+    <p>
+        <button type="button" onclick="document.getElementById('new-component').showModal()">+ Нов компонент</button>
+        <button type="button" onclick="document.getElementById('new-delivery').showModal()">+ Нова доставка</button>
+        <button type="button" onclick="document.getElementById('new-correction').showModal()">Корекция</button>
+    </p>
 
-    <h2>Нов компонент</h2>
-    <form method="post">
-        <p>Код: <input type="text" name="part_number" required></p>
-        <p>Име: <input type="text" name="name" required></p>
-        <p>Тип: <input type="text" name="type"></p>
-        <p>Минимум: <input type="number" name="min_quantity" min="0" value="0" required></p>
-        <p>Доставчик: <input type="text" name="supplier"></p>
-        <button type="submit">Добави компонент</button>
-    </form>
+    <dialog id="new-component">
+        <h2>Нов компонент</h2>
+        <form method="post">
+            <p>Код: <input type="text" name="part_number" required></p>
+            <p>Име: <input type="text" name="name" required></p>
+            <p>Тип: <input type="text" name="type"></p>
+            <p>Минимум: <input type="number" name="min_quantity" min="0" value="0" required></p>
+            <p>Доставчик: <input type="text" name="supplier"></p>
+            <button type="submit">Добави компонент</button>
+            <button type="button" onclick="document.getElementById('new-component').close()">Отказ</button>
+        </form>
+    </dialog>
+
+    <dialog id="new-delivery">
+        <h2>Нова доставка</h2>
+        <form method="post" action="{{ url_for('delivery') }}">
+            <p>
+                Компонент:
+                <select name="component_id">
+                    {% for c in components %}
+                    <option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Количество: <input type="number" name="qty" min="1" required></p>
+            <p>Цена за брой (€): <input type="number" name="unit_price" min="0" step="0.01" required></p>
+            <button type="submit">Заприхождавай</button>
+            <button type="button" onclick="document.getElementById('new-delivery').close()">Отказ</button>
+        </form>
+    </dialog>
+
+    <dialog id="new-correction">
+        <h2>Корекция на наличност</h2>
+        <p>При брак, загуба или намерени бройки. Отрицателно число намалява, положително увеличава.</p>
+        <form method="post" action="{{ url_for('correction') }}">
+            <p>
+                Компонент:
+                <select name="component_id">
+                    {% for c in components %}
+                    <option value="{{ c.id }}">{{ c.part_number }} · {{ c.name }} (налични: {{ c.quantity }})</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Промяна (бр.): <input type="number" name="change" required></p>
+            <button type="submit">Запиши корекцията</button>
+            <button type="button" onclick="document.getElementById('new-correction').close()">Отказ</button>
+        </form>
+    </dialog>
+
 
     <h2>Всички компоненти</h2>
     <table>

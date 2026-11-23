@@ -157,7 +157,9 @@ def correction():
             conn.close()
             return redirect(url_for("components"))
         except ValueError as e:
-            error = str(e)
+            flash(str(e))
+            conn.close()
+            return redirect(url_for("components"))
     rows = conn.execute("SELECT id, part_number, name, quantity FROM components WHERE active = 1 ORDER BY part_number").fetchall()
     conn.close()
     return render_template("correction.html", components=rows, error=error)
