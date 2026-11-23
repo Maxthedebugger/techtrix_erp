@@ -11,36 +11,27 @@
 {% endfor %}
     
 {% if session.role == "director" %}
-    
-<h2>Нова поръчка</h2>
-    
-<form method="post">
-        
-<p>
-            
-Продукт:
-            
-<select name="product_id">
-                
-{% for p in products %}
-                
-<option value="{{ p.id }}">{{ p.code }} · {{ p.name }}</option>
-                
-{% endfor %}
-            
-</select>
-        
-</p>
-        
-<p>Брой: <input type="number" name="quantity" min="1" required></p>
-        
-<p>Срок: <input type="date" name="due_date"></p>
-        
-<button type="submit">Създай поръчка</button>
-    
-</form>
-    
+    <p><button type="button" onclick="document.getElementById('new-order').showModal()">+ Нова поръчка</button></p>
+
+    <dialog id="new-order">
+        <h2>Нова поръчка за производство</h2>
+        <form method="post">
+            <p>
+                Продукт:
+                <select name="product_id">
+                    {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.code }} · {{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Брой: <input type="number" name="quantity" min="1" required></p>
+            <p>Срок: <input type="date" name="due_date"></p>
+            <button type="submit">Създай поръчка</button>
+            <button type="button" onclick="document.getElementById('new-order').close()">Отказ</button>
+        </form>
+    </dialog>
 {% endif %}
+
     
 <h2>Всички поръчки</h2>
     

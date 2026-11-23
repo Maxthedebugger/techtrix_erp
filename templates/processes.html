@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Процеси · Techtrix ERP{% endblock %}
+{% block content %}
+    <h1>Процеси и часови ставки</h1>
+    <p><button type="button" onclick="document.getElementById('edit-rate').showModal()">Смени ставка</button></p>
+    {% for msg in get_flashed_messages() %}
+        <p class="error">{{ msg }}</p>
+    {% endfor %}
+
+    <dialog id="edit-rate">
+        <h2>Смяна на часовата ставка</h2>
+        <form method="post">
+            <p>
+                Процес:
+                <select name="process_id">
+                    {% for pr in processes %}
+                    <option value="{{ pr.id }}">{{ pr.name }} (сега {{ "%.2f"|format(pr.hourly_rate) }} €/ч)</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Нова ставка (€ на час): <input type="number" name="hourly_rate" step="0.01" min="0.01" required></p>
+            <p>Себестойността на всички продукти с този процес се преизчислява веднага.</p>
+            <button type="submit">Запиши</button>
+            <button type="button" onclick="document.getElementById('edit-rate').close()">Отказ</button>
+        </form>
+    </dialog>
+
+    <table>
+        <tr>
+            <th>Процес</th>
+            <th>Ставка (€/ч)</th>
+            <th>Ставка (€/мин)</th>
+            <th>Ползва се в продукти</th>
+        </tr>
+        {% for pr in processes %}
+        <tr>
+            <td>{{ pr.name }}</td>
+            <td>{{ "%.2f"|format(pr.hourly_rate) }}</td>
+            <td>{{ "%.3f"|format(pr.hourly_rate / 60) }}</td>
+            <td>{{ pr.products }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

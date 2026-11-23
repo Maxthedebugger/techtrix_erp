@@ -511,5 +511,37 @@ def product_remove(product_id):
         flash(str(e))
     conn.close()
     return redirect(url_for("products"))
+@app.route("/processes", methods=["GET", "POST"])
+def processes_page():
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        try:
+            process_id = int(request.form["process_id"])
+            rate = float(request.form["hourly_rate"])
+            if rate <= 0:
+                raise ValueError("Ставката трябва да е повече от 0")
+            process = conn.execute("SELECT name FROM processes WHERE id = ?", (process_id,)).fetchone()
+            if process is None:
+                raise ValueError("Няма такъв процес")
+            with conn:
+                conn.execute("UPDATE processes SET hourly_rate = ? WHERE id = ?", (rate, process_id))
+            flash(f"Ставката за „{process['name']}“ вече е {rate:.2f} €/ч")
+        except ValueError as e:
+            flash(str(e))
+        conn.close()
+        return redirect(url_for("processes_page"))
+    rows = conn.execute(
+        """SELECT pr.id, pr.name, pr.hourly_rate, COUNT(pp.product_id) AS products
+           FROM processes pr
+           LEFT JOIN product_processes pp ON pp.process_id = pr.id
+           GROUP BY pr.id
+           ORDER BY pr.id"""
+    ).fetchall()
+    conn.close()
+    return render_template("processes.html", processes=rows)
+
 if __name__ == "__main__":
     app.run(debug=True)
