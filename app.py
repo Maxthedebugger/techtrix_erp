@@ -104,8 +104,15 @@ def movements():
     if reason:
         sql += " AND m.reason = ?"
         params.append(reason)
-    rows = conn.execute(sql + " ORDER BY m.id DESC", params).fetchall()
-
+    per_page = request.args.get("per_page", 25, type=int)
+    if per_page not in (25, 50, 100):
+        per_page = 25
+    total = conn.execute("SELECT COUNT(*) FROM (" + sql + ")", params).fetchone()[0]
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = request.args.get("page", 1, type=int)
+    page = min(max(page, 1), pages)
+    offset = (page - 1) * per_page
+    rows = conn.execute(sql + " ORDER BY m.id DESC LIMIT ? OFFSET ?", params + [per_page, offset]).fetchall()
     sql = """SELECT m.created_at, p.code, m.change, m.reason, m.order_id, m.sale_id
              FROM product_movements m
              JOIN products p ON p.id = m.product_id
@@ -127,7 +134,8 @@ def movements():
     ).fetchall()
     conn.close()
     return render_template("movements.html", movements=rows, moves=moves,
-                           codes=codes, reasons=reasons, code=code, reason=reason)
+                           codes=codes, reasons=reasons, code=code, reason=reason,
+                           page=page, pages=pages, per_page=per_page, total=total)
 @app.route("/correction", methods=["GET", "POST"])
 def correction():
     denied = require_role("director", "warehouse")

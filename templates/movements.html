@@ -18,6 +18,12 @@
             <option value="{{ r.reason }}" {% if r.reason == reason %}selected{% endif %}>{{ r.reason }}</option>
             {% endfor %}
         </select>
+        По:
+        <select name="per_page">
+            {% for n in [25, 50, 100] %}
+            <option value="{{ n }}" {% if n == per_page %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
+        </select>
         <button type="submit">Покажи</button>
         <a href="{{ url_for('movements') }}">Изчисти</a>
     </form>
@@ -62,6 +68,15 @@
 {% endfor %}
     
 </table>
+    <p>
+        {% if page > 1 %}
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page - 1) }}">← Предишна</a>
+        {% endif %}
+        Страница {{ page }} от {{ pages }} (общо {{ total }} движения)
+        {% if page < pages %}
+        <a href="{{ url_for('movements', code=code, reason=reason, per_page=per_page, page=page + 1) }}">Следваща →</a>
+        {% endif %}
+    </p>
     <h2>Движение на продуктите</h2>
     <table>
         <tr>
