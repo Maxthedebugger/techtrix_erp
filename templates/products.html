@@ -5,17 +5,22 @@
     {% for msg in get_flashed_messages() %}
         <p class="error">{{ msg }}</p>
     {% endfor %}
-
     {% if session.role == "director" %}
-    <h2>Нов продукт</h2>
-    <form method="post">
-        <p>Код: <input type="text" name="code" required></p>
-        <p>Име: <input type="text" name="name" required></p>
-        <p>Продажна цена (€): <input type="number" name="sale_price" step="0.01" min="0.01" required></p>
-        <button type="submit">Добави продукт</button>
-    </form>
-    <p>След добавяне се отваря страницата на продукта. Там добави рецептата и часовете.</p>
+    <p><button type="button" onclick="document.getElementById('new-product').showModal()">+ Нов продукт</button></p>
+
+    <dialog id="new-product">
+        <h2>Нов продукт</h2>
+        <form method="post">
+            <p>Код: <input type="text" name="code" required></p>
+            <p>Име: <input type="text" name="name" required></p>
+            <p>Продажна цена (€): <input type="number" name="sale_price" step="0.01" min="0.01" required></p>
+            <p>След добавяне се отваря страницата на продукта. Там добави рецептата и часовете.</p>
+            <button type="submit">Добави продукт</button>
+            <button type="button" onclick="document.getElementById('new-product').close()">Отказ</button>
+        </form>
+    </dialog>
     {% endif %}
+
 
     <h2>Всички продукти</h2>
     <table>
