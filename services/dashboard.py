@@ -103,6 +103,3 @@ def get_dashboard(conn):
     ).fetchall()
  
     return d
-Branded Links & QR Codes for Growth | s.id
-Launch branded short links, campaign microsites, and dynamic QR codes from one platform. Built for marketing, growth, SaaS, and AI teams.
- 
