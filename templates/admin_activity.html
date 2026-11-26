@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Лог на активността · Techtrix ERP{% endblock %}
+{% block content %}
+{% set states = {"online": "Онлайн", "logout": "Излязъл", "expired": "Неактивен", "failed": "Грешна парола"} %}
+<h1>Администрация: лог на активността</h1>
+
+<h2>Онлайн в момента ({{ online|length }})</h2>
+<p>
+    {% for o in online %}
+    <span class="badge badge-online">● {{ o.username }}</span>
+    {% else %}
+    Никой (освен ако не сте влезли преди повече от 15 минути без действие).
+    {% endfor %}
+</p>
+<p class="hint">„Онлайн“ значи, че потребителят е влязъл, не е натиснал „Изход“ и е отварял страница през последните 15 минути.</p>
+
+<h2>Последните 100 влизания</h2>
+<table>
+    <tr><th>Потребител</th><th>Вход</th><th>Последно действие</th><th>Изход</th><th>Състояние</th></tr>
+    {% for l in log %}
+    <tr>
+        <td>{{ l.username }}</td>
+        <td>{{ l.login_at|bg_time }}</td>
+        <td>{{ l.last_seen|bg_time if l.success else "" }}</td>
+        <td>{{ l.logout_at|bg_time }}</td>
+        <td><span class="badge badge-{{ l.state }}">{{ states[l.state] }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Още няма влизания</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

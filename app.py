@@ -9,11 +9,12 @@ from services.forecast import forecast_component
 from services.sales import ship_sale, cancel_sale
 from services.products import add_product, remove_product
 from services.dashboard import get_dashboard
- 
+from services.users import ROLES, create_user, set_password, set_role, bg_time
 
 app = Flask(__name__)
 
 app.secret_key = "techtrix-dev-key-2026"
+app.add_template_filter(bg_time, "bg_time")
 def require_role(*roles):
     if "username" not in session:
         return redirect(url_for("login"))
@@ -32,6 +33,7 @@ def index():
  
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    error = None
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -39,15 +41,40 @@ def login():
         user = conn.execute(
             "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone()
+        ok = user is not None and check_password_hash(user["password_hash"], password)
+        with conn:
+            cur = conn.execute(
+                "INSERT INTO login_log (username, success) VALUES (?, ?)",
+                (username, 1 if ok else 0)
+            )
         conn.close()
-        if user and check_password_hash(user["password_hash"], password):
+        if ok:
             session["username"] = user["username"]
             session["role"] = user["role"]
+            session["log_id"] = cur.lastrowid
             return redirect(url_for("index"))
-        return "Грешно име или парола"
-    return render_template("login.html")
+        error = "Грешно име или парола"
+    return render_template("login.html", error=error)
+@app.before_request
+def update_last_seen():
+    if "log_id" in session and request.endpoint != "static":
+        conn = get_db()
+        with conn:
+            conn.execute(
+                "UPDATE login_log SET last_seen = CURRENT_TIMESTAMP WHERE id = ?",
+                (session["log_id"],)
+            )
+        conn.close()
 @app.route("/logout")
 def logout():
+    if "log_id" in session:
+        conn = get_db()
+        with conn:
+            conn.execute(
+                "UPDATE login_log SET logout_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (session["log_id"],)
+            )
+        conn.close()
     session.clear()
     return redirect(url_for("login"))
 @app.route("/components", methods=["GET", "POST"])
@@ -549,5 +576,88 @@ def processes_page():
     conn.close()
     return render_template("processes.html", processes=rows)
 
+@app.route("/admin/users", methods=["GET", "POST"])
+def admin_users():
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        try:
+            create_user(conn, request.form["username"], request.form["role"],
+                        request.form["password"], request.form["password2"])
+            flash(f"Потребителят „{request.form['username'].strip()}“ е създаден", "success")
+        except ValueError as e:
+            flash(str(e))
+        conn.close()
+        return redirect(url_for("admin_users"))
+    users = conn.execute(
+        """SELECT u.id, u.username, u.role,
+                  (SELECT MAX(l.login_at) FROM login_log l
+                   WHERE l.username = u.username AND l.success = 1) AS last_login
+           FROM users u
+           ORDER BY u.role, u.username"""
+    ).fetchall()
+    conn.close()
+    return render_template("admin_users.html", users=users, roles=ROLES)
+@app.route("/admin/users/<int:user_id>/password", methods=["POST"])
+def admin_user_password(user_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        name = set_password(conn, user_id, request.form["password"], request.form["password2"])
+        flash(f"Паролата на „{name}“ е сменена", "success")
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("admin_users"))
+@app.route("/admin/users/<int:user_id>/role", methods=["POST"])
+def admin_user_role(user_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        role = request.form["role"]
+        name = set_role(conn, user_id, role)
+        flash(f"„{name}“ вече е {ROLES[role]}", "success")
+        if name == session["username"]:
+            session["role"] = role
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    if session["role"] != "director":
+        return redirect(url_for("index"))
+    return redirect(url_for("admin_users"))
+@app.route("/admin/activity")
+def admin_activity():
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    online = conn.execute(
+        """SELECT username, MAX(last_seen) AS last_seen
+           FROM login_log
+           WHERE success = 1 AND logout_at IS NULL
+             AND last_seen >= datetime('now', '-15 minutes')
+           GROUP BY username
+           ORDER BY username"""
+    ).fetchall()
+    log = conn.execute(
+        """SELECT *,
+                  CASE
+                    WHEN success = 0 THEN 'failed'
+                    WHEN logout_at IS NOT NULL THEN 'logout'
+                    WHEN last_seen >= datetime('now', '-15 minutes') THEN 'online'
+                    ELSE 'expired'
+                  END AS state
+           FROM login_log
+           ORDER BY id DESC
+           LIMIT 100"""
+    ).fetchall()
+    conn.close()
+    return render_template("admin_activity.html", online=online, log=log)
 if __name__ == "__main__":
     app.run(debug=True)

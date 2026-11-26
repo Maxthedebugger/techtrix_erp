@@ -367,4 +367,55 @@ header.header-hidden {
 .tile-row:last-child {
     border-bottom: none;
 }
+/* --- Форми: етикет вляво, поле вдясно, подравнени --- */
+.form-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 12px;
+    align-items: center;
+}
+.form-grid label {
+    text-align: right;
+}
+
+/* --- Страница за вход в центъра --- */
+.login-card {
+    max-width: 380px;
+    margin: 12vh auto 0;          /* auto отляво и отдясно = в средата */
+    padding: 28px 32px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+.login-card h1 {
+    text-align: center;
+}
+.login-card button[type="submit"] {
+    width: 100%;
+}
+
+/* --- Етикети за състояние в лога --- */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 6px;
+}
+.badge-online { background: var(--green-bg); color: var(--green-ink); }
+.badge-failed { background: var(--red-bg); color: var(--red-ink); }
+.badge-logout,
+.badge-expired { background: var(--head); color: var(--soft); }
+.hint {
+    color: var(--soft);
+    font-size: 13px;
+}
+
+/* --- Менюто минава на 2 реда, ако не се побира --- */
+header {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
  

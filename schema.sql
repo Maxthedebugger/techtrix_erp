@@ -81,3 +81,11 @@ CREATE TABLE product_movements  (
     sale_id INTEGER REFERENCES sales(id),
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE login_log (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    success INTEGER NOT NULL,
+    login_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    last_seen TEXT DEFAULT CURRENT_TIMESTAMP,
+    logout_at TEXT
+);

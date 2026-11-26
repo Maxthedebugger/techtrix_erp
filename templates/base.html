@@ -47,6 +47,13 @@
         {% if session.role == "director" %}
         <a href="{{ url_for('report') }}">Отчет</a>
         <a href="{{ url_for('processes_page') }}">Процеси</a>
+        <span class="dropdown">
+            <a href="{{ url_for('admin_users') }}">Администрация ▾</a>
+            <span class="dropdown-menu">
+                <a href="{{ url_for('admin_users') }}">Потребители</a>
+                <a href="{{ url_for('admin_activity') }}">Лог на активността</a>
+            </span>
+        </span>
         {% endif %}
     </nav>
     {% endif %}

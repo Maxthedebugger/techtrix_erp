@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Потребители · Techtrix ERP{% endblock %}
+{% block content %}
+<h1>Администрация: потребители</h1>
+
+{% for category, msg in get_flashed_messages(with_categories=true) %}
+<p class="{{ 'success' if category == 'success' else 'error' }}">{{ msg }}</p>
+{% endfor %}
+
+<p>
+    <button type="button" onclick="document.getElementById('new-user').showModal()">+ Нов потребител</button>
+</p>
+
+<dialog id="new-user">
+    <h2>Нов потребител</h2>
+    <form method="post" class="form-grid">
+        <label>Потребител:</label> <input type="text" name="username" required>
+        <label>Роля:</label>
+        <select name="role">
+            {% for key, name in roles.items() %}
+            <option value="{{ key }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+        <label>Парола:</label> <input type="password" name="password" minlength="6" required>
+        <label>Повтори паролата:</label> <input type="password" name="password2" minlength="6" required>
+        <span></span>
+        <span>
+            <button type="submit">Създай</button>
+            <button type="button" onclick="document.getElementById('new-user').close()">Отказ</button>
+        </span>
+    </form>
+</dialog>
+
+<table>
+    <tr><th>№</th><th>Потребител</th><th>Роля</th><th>Последен вход</th><th>Смяна на ролята</th><th>Парола</th></tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}{% if u.username == session.username %} (вие){% endif %}</td>
+        <td>{{ roles[u.role] }}</td>
+        <td>{{ u.last_login|bg_time or "никога" }}</td>
+        <td>
+            <form method="post" action="{{ url_for('admin_user_role', user_id=u.id) }}">
+                <select name="role">
+                    {% for key, name in roles.items() %}
+                    <option value="{{ key }}" {% if key == u.role %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Смени</button>
+            </form>
+        </td>
+        <td>
+            <button type="button" onclick="document.getElementById('pass-{{ u.id }}').showModal()">Смени паролата</button>
+            <dialog id="pass-{{ u.id }}">
+                <h2>Нова парола за „{{ u.username }}“</h2>
+                <form method="post" action="{{ url_for('admin_user_password', user_id=u.id) }}" class="form-grid">
+                    <label>Нова парола:</label> <input type="password" name="password" minlength="6" required>
+                    <label>Повтори паролата:</label> <input type="password" name="password2" minlength="6" required>
+                    <span></span>
+                    <span>
+                        <button type="submit">Запиши</button>
+                        <button type="button" onclick="document.getElementById('pass-{{ u.id }}').close()">Отказ</button>
+                    </span>
+                </form>
+            </dialog>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
