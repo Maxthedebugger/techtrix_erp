@@ -8,6 +8,8 @@ from services.production import start_production, finish_order, cancel_order
 from services.forecast import forecast_component
 from services.sales import ship_sale, cancel_sale
 from services.products import add_product, remove_product
+from services.dashboard import get_dashboard
+ 
 
 app = Flask(__name__)
 
@@ -23,7 +25,11 @@ def require_role(*roles):
 def index():
     if "username" not in session:
         return redirect(url_for("login"))
-    return render_template("index.html")
+    conn = get_db()
+    d = get_dashboard(conn)
+    conn.close()
+    return render_template("index.html", d=d)
+ 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
