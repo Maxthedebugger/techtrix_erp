@@ -1,88 +1,240 @@
+/* ===== Techtrix ERP: модерен вид ===== */
+ 
+/* Шрифт Inter от Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+ 
+/* --- Цветове (променливи). Сменяш ги тук и се сменят навсякъде --- */
+:root {
+    --bg: #f5f7fa;          /* фон на страницата */
+    --card: #ffffff;        /* фон на таблици, карти, прозорци */
+    --ink: #1b2430;         /* основен текст */
+    --soft: #677485;        /* блед текст */
+    --line: #e4e9ef;        /* тънки линии */
+    --head: #f0f3f7;        /* фон на заглавния ред в таблица */
+    --brand: #1f3b57;       /* тъмносиньо за менюто */
+    --brand-2: #2c5378;     /* по-светло синьо при посочване */
+    --blue: #2563c9;        /* главен бутон */
+    --blue-h: #1d4fa3;      /* главен бутон при посочване */
+    --red: #c9302c;         /* опасен бутон */
+    --red-bg: #fdecea;      /* фон за грешки и недостиг */
+    --red-ink: #9b1c1c;
+    --green-bg: #e7f6ec;    /* фон за успех */
+    --green-ink: #1a6b3a;
+    --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+ 
+/* Тъмна тема: включва се, когато <html> има data-theme="dark" */
+[data-theme="dark"] {
+    --bg: #0f141a;
+    --card: #18202a;
+    --ink: #e6ebf1;
+    --soft: #98a6b5;
+    --line: #2a3542;
+    --head: #1f2934;
+    --brand: #0b1522;
+    --brand-2: #1a2a3d;
+    --blue: #4d8be6;
+    --blue-h: #6a9fec;
+    --red: #e0605b;
+    --red-bg: #3a1d1d;
+    --red-ink: #f4a7a4;
+    --green-bg: #173324;
+    --green-ink: #8fdcaa;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+ 
+/* --- Основа --- */
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--ink);
 }
-
+ 
+h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 16px; }
+h2 { font-size: 1.15rem; font-weight: 600; margin: 24px 0 10px; }
+ 
+/* --- Горно меню --- */
 header {
     display: flex;
     gap: 24px;
     align-items: center;
     padding: 12px 24px;
-    background: #1f3b57;
+    background: var(--brand);
+    color: white;
+    white-space: nowrap;   /* надписите в менюто не се чупят на два реда */
+    font-size: 14px;
+}
+header nav {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+header nav > a,
+header nav .dropdown > a {
+    padding: 6px 9px;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+}
+header nav > a:hover,
+header nav .dropdown > a:hover {
+    background: rgba(255, 255, 255, 0.12);
     color: white;
 }
-
 header a {
     color: white;
 }
-
-header span {
+header > span {
     margin-left: auto;
 }
-
+ 
 main {
     margin: 24px 0;
     padding: 0 24px;
 }
-
+ 
+/* --- Таблици като карти --- */
 table {
     width: 100%;
-    border-collapse: collapse;
-    background: white;
+    border-collapse: separate;   /* нужно, за да има заоблени ъгли */
+    border-spacing: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
 }
-
 th, td {
-    padding: 8px 12px;
-    border-bottom: 1px solid #ddd;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
     text-align: left;
 }
-
 th {
-    background: #e8eef4;
+    background: var(--head);
+    color: var(--soft);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
-.low {
-    background: #fde2e2;
-    color: #a40000;
-    font-weight: bold;
+tr:last-child td {
+    border-bottom: none;
+}
+tbody tr:hover td,
+tr:hover td {
+    background: rgba(37, 99, 201, 0.06);  /* редът светва при посочване */
+}
+ 
+/* Компонент под минимума */
+.low td,
+tr.low:hover td {
+    background: var(--red-bg);
+    color: var(--red-ink);
+    font-weight: 600;
+}
+ 
+/* --- Съобщения --- */
+.error,
+.success {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 500;
 }
 .error {
-    padding: 8px 12px;
-    background: #fde2e2;
-    color: #a40000;
+    background: var(--red-bg);
+    color: var(--red-ink);
 }
 .success {
-    padding: 8px 12px;
-    background: #e2f5e2;
-    color: #1a6b1a;
+    background: var(--green-bg);
+    color: var(--green-ink);
 }
-dialog {
-    border: none;
+ 
+/* --- Полета във формите --- */
+input, select, textarea {
+    font: inherit;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    padding: 20px 24px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    background: var(--card);
+    color: var(--ink);
 }
-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.4);
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--blue);
+    outline-offset: 0;
 }
+ 
+/* --- Бутони: цвят според смисъла --- */
+/* Главен бутон (изпраща формата): син */
+button {
+    font: inherit;
+    font-weight: 600;
+    padding: 7px 14px;
+    border: 1px solid var(--blue);
+    border-radius: 8px;
+    background: var(--blue);
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background: var(--blue-h);
+    border-color: var(--blue-h);
+}
+/* Второстепенен бутон („Отказ“ в прозореца) и бутоните-линкове: бели */
+dialog button[type="button"],
 main a {
     display: inline-block;
-    padding: 1px 6px;
-    border: 1px solid #767676;
-    border-radius: 3px;
-    background: #efefef;
-    color: black;
-    font-size: 13.33px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
     text-decoration: none;
 }
+dialog button[type="button"]:hover,
 main a:hover {
-    background: #e3e3e3;
+    background: var(--head);
+    border-color: var(--line);
 }
+/* Опасен бутон (премахване, отказ на поръчка/продажба): червен */
+form[action*="remove"] button,
+form[action*="cancel"] button {
+    background: var(--card);
+    border-color: var(--red);
+    color: var(--red);
+}
+form[action*="remove"] button:hover,
+form[action*="cancel"] button:hover {
+    background: var(--red);
+    color: white;
+}
+/* Линковете в таблиците си остават обикновени линкове */
 main td a,
 main td a:hover {
     all: revert;
 }
+main td a {
+    color: var(--blue);
+}
+ 
+/* --- Поп-ъп прозорци --- */
+dialog {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 24px;
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+dialog::backdrop {
+    background: rgba(15, 20, 26, 0.5);
+}
+ 
+/* --- Падащо подменю в „Движения“ --- */
 .dropdown {
     position: relative;
     display: inline-block;
@@ -91,44 +243,51 @@ main td a:hover {
     display: none;
     position: absolute;
     top: 100%;
-    left: -12px;
-    padding-top: 12px;
-    min-width: 160px;
+    left: 0;
+    padding-top: 8px;
+    min-width: 170px;
     z-index: 10;
 }
 .dropdown-menu a {
     display: block;
-    padding: 8px 12px;
-    background: #1f3b57;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 9px 14px;
+    background: var(--brand);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     text-decoration: none;
 }
+.dropdown-menu a:first-child {
+    border-radius: 8px 8px 0 0;
+}
+.dropdown-menu a:last-child {
+    border-radius: 0 0 8px 8px;
+}
 .dropdown-menu a:hover {
-    background: #2c5378;
+    background: var(--brand-2);
 }
 .dropdown:hover .dropdown-menu,
 .dropdown:focus-within .dropdown-menu {
     display: block;
 }
-
+ 
+/* --- Табове в „Движения“ --- */
 .tabs {
     display: flex;
     gap: 4px;
-    border-bottom: 2px solid #1f3b57;
-    margin-bottom: 12px;
+    border-bottom: 2px solid var(--brand);
+    margin-bottom: 14px;
 }
 main .tabs a.tab {
-    padding: 7px 18px;
+    padding: 8px 18px;
     font-size: 15px;
-    font-weight: bold;
-    border: 1px solid #ddd;
+    border: 1px solid var(--line);
     border-bottom: none;
-    border-radius: 6px 6px 0 0;
-    background: #e8eef4;
-    color: #555;
+    border-radius: 8px 8px 0 0;
+    background: var(--head);
+    color: var(--soft);
 }
 main .tabs a.tab.active {
-    background: #1f3b57;
-    border-color: #1f3b57;
+    background: var(--brand);
+    border-color: var(--brand);
     color: white;
 }
+ 
