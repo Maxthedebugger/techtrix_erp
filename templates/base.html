@@ -1,71 +1,67 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    
 <meta charset="utf-8">
-    
 <title>{% block title %}Techtrix ERP{% endblock %}</title>
-    
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script>
+    // Ако преди е избрана тъмна тема, включи я веднага (преди да се покаже страницата)
+    if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.dataset.theme = "dark";
+    }
+    // Сменя темата при натискане на бутона 🌙 / ☀️
+    function toggleTheme() {
+        const html = document.documentElement;
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = "light";
+            localStorage.setItem("theme", "light");
+        } else {
+            html.dataset.theme = "dark";
+            localStorage.setItem("theme", "dark");
+        }
+    }
+</script>
 </head>
 <body>
-    
 <header>
-        
-<strong>Techtrix ERP</strong>
-        
-{% if session.username %}
-            
-<nav>
-                
-<a href="{{ url_for('index') }}">Начало</a>
-                
-{% if session.role in ["director", "warehouse"] %}
-                    
-<a href="{{ url_for('components') }}">Склад</a>
-                    
-<span class="dropdown">
-    <a href="{{ url_for('movements') }}">Движения ▾</a>
-    <span class="dropdown-menu">
-        <a href="{{ url_for('movements', view='components') }}">Компоненти</a>
-        <a href="{{ url_for('movements', view='products') }}">Продукти</a>
+    <strong>Techtrix ERP</strong>
+    {% if session.username %}
+    <nav>
+        <a href="{{ url_for('index') }}">Начало</a>
+        {% if session.role in ["director", "warehouse"] %}
+        <a href="{{ url_for('components') }}">Склад</a>
+        <span class="dropdown">
+            <a href="{{ url_for('movements') }}">Движения ▾</a>
+            <span class="dropdown-menu">
+                <a href="{{ url_for('movements', view='components') }}">Компоненти</a>
+                <a href="{{ url_for('movements', view='products') }}">Продукти</a>
+            </span>
+        </span>
+        <a href="{{ url_for('forecast') }}">AI прогноза</a>
+        {% endif %}
+        <a href="{{ url_for('products') }}">Продукти</a>
+        <a href="{{ url_for('orders') }}">Производство</a>
+        {% if session.role in ["director", "warehouse"] %}
+        <a href="{{ url_for('sales') }}">Продажби</a>
+        {% endif %}
+        {% if session.role == "director" %}
+        <a href="{{ url_for('report') }}">Отчет</a>
+        <a href="{{ url_for('processes_page') }}">Процеси</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    <span>
+        <button type="button" class="theme-btn" onclick="toggleTheme()" title="Светла / тъмна тема">🌙</button>
+        {% if session.username %}
+        {{ session.username }} ({{ session.role }})
+        · <a href="{{ url_for('change_password') }}">Смени паролата</a>
+        · <a href="{{ url_for('logout') }}">Изход</a>
+        {% endif %}
     </span>
-</span>
-
-<a href="{{ url_for('forecast') }}">AI прогноза</a>       
-{% endif %}
-                
-<a href="{{ url_for('products') }}">Продукти</a>
-                
-<a href="{{ url_for('orders') }}">Производство</a>
-{% if session.role in ["director", "warehouse"] %}
-<a href="{{ url_for('sales') }}">Продажби</a>
-{% endif %}
-{% if session.role == "director" %}
-<a href="{{ url_for('report') }}">Отчет</a>
-<a href="{{ url_for('processes_page') }}">Процеси</a>
-{% endif %}
-            
-</nav>
-            
-<span>
-                
-{{ session.username }} ({{ session.role }})
-                
-· <a href="{{ url_for('change_password') }}">Смени паролата</a>
-                
-· <a href="{{ url_for('logout') }}">Изход</a>
-            
-</span>
-        
-{% endif %}
-    
 </header>
-    
 <main>
-        
-{% block content %}{% endblock %}
-    
+    {% block content %}{% endblock %}
 </main>
 </body>
 </html>
+ 
