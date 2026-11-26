@@ -347,7 +347,24 @@ header.header-hidden {
 }
 .dash-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));  /* по 2 таблици на ред */
+    grid-template-columns: 1fr 1fr;   /* точно 2 таблици на ред */
     gap: 0 20px;
+}
+@media (max-width: 1100px) {
+    .dash-grid { grid-template-columns: 1fr; }   /* на тесен екран: по 1 на ред */
+}
+.dash-grid section {
+    min-width: 0;        /* таблицата не може да излезе извън своята колона */
+    overflow-x: auto;
+}
+.tile-row {
+    display: flex;
+    justify-content: space-between;   /* кодът вляво, бройката вдясно */
+    font-size: 14px;
+    padding: 3px 0;
+    border-bottom: 1px solid var(--line);
+}
+.tile-row:last-child {
+    border-bottom: none;
 }
  

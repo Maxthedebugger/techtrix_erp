@@ -38,8 +38,9 @@
     {% if role in ["director", "production"] %}
     <div class="tile">
         <small>Можем да произведем</small>
-        <strong>{% for p in d.can_make %}{{ p.n }}{% if not loop.last %} · {% endif %}{% endfor %}</strong>
-        <p>{% for p in d.can_make %}{{ p.code }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+        {% for p in d.can_make %}
+        <div class="tile-row"><span>{{ p.code }}</span><b>{{ p.n }} бр.</b></div>
+        {% endfor %}
     </div>
     {% endif %}
  
