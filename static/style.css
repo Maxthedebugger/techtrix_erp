@@ -301,4 +301,14 @@ header .theme-btn {
 header .theme-btn:hover {
     background: rgba(255, 255, 255, 0.15);
 }
+/* --- Менюто остава горе и се показва при скрол нагоре --- */
+header {
+    position: sticky;              /* „залепва“ горе, докато скролваш */
+    top: 0;
+    z-index: 20;                   /* над таблиците и подменюто */
+    transition: transform 0.25s;   /* плавно скриване и показване */
+}
+header.header-hidden {
+    transform: translateY(-100%);  /* премества менюто нагоре, извън екрана */
+}
  
