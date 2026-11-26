@@ -311,4 +311,43 @@ header {
 header.header-hidden {
     transform: translateY(-100%);  /* премества менюто нагоре, извън екрана */
 }
+/* --- Начално табло --- */
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 240px));  /* карти до 240 px */
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.tile {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 14px 16px;
+}
+.tile small {
+    color: var(--soft);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.tile strong {
+    display: block;
+    font-size: 1.6rem;
+    margin: 4px 0;
+}
+.tile p {
+    margin: 0;
+    color: var(--soft);
+    font-size: 13px;
+}
+.tile-warn {
+    border-left: 4px solid var(--red);
+}
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));  /* по 2 таблици на ред */
+    gap: 0 20px;
+}
  
