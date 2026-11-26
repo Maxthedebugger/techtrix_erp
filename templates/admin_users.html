@@ -3,9 +3,7 @@
 {% block content %}
 <h1>Администрация: потребители</h1>
 
-{% for category, msg in get_flashed_messages(with_categories=true) %}
-<p class="{{ 'success' if category == 'success' else 'error' }}">{{ msg }}</p>
-{% endfor %}
+
 
 <p>
     <button type="button" onclick="document.getElementById('new-user').showModal()">+ Нов потребител</button>

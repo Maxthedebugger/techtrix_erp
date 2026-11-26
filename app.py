@@ -88,6 +88,7 @@ def components():
             min_quantity = int(request.form["min_quantity"])
             add_component(conn, request.form["part_number"], request.form["name"],
                           request.form["type"], min_quantity, request.form["supplier"])
+            flash(f"Компонентът „{request.form['part_number'].strip().upper()}“ е добавен", "success")
         except ValueError as e:
             flash(str(e))
         conn.close()
@@ -112,6 +113,7 @@ def delivery():
         qty = int(request.form["qty"])
         unit_price = float(request.form["unit_price"])
         receive_delivery(conn, component_id, qty, unit_price)
+        flash(f"Доставката е заприходена: +{qty} бр.", "success")
         conn.close()
         return redirect(url_for("components"))
     rows = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
@@ -181,6 +183,7 @@ def correction():
         change = int(request.form["change"])
         try:
             correct_stock(conn, component_id, change)
+            flash(f"Корекцията е записана: {change:+d} бр.", "success")
             conn.close()
             return redirect(url_for("components"))
         except ValueError as e:
@@ -234,7 +237,7 @@ def products():
             sale_price = float(request.form["sale_price"])
             product_id = add_product(conn, request.form["code"], request.form["name"], sale_price)
             conn.close()
-            flash("Продуктът е добавен. Сега добави рецептата и часовете.")
+            flash("Продуктът е добавен. Сега добави рецептата и часовете.", "success")
             return redirect(url_for("product_detail", product_id=product_id))
         except ValueError as e:
             flash(str(e))
@@ -268,6 +271,7 @@ def product_detail(product_id):
         component_id = int(request.form["component_id"])
         quantity = int(request.form["quantity"])
         set_bom_item(conn, product_id, component_id, quantity)
+        flash("Рецептата е обновена", "success")
         conn.close()
         return redirect(url_for("product_detail", product_id=product_id))
     bom = conn.execute("""
@@ -312,6 +316,7 @@ def orders():
                 "INSERT INTO orders (product_id, quantity, due_date) VALUES (?, ?, ?)",
                 (product_id, quantity, due_date)
             )
+        flash("Поръчката за производство е създадена", "success")
         conn.close()
         return redirect(url_for("orders"))
     rows = conn.execute("""
@@ -332,8 +337,7 @@ def order_start(order_id):
     conn = get_db()
     try:
         start_production(conn, order_id)
-    except ValueError as e:
-        flash(str(e))
+        flash(f"Поръчка №{order_id} е пусната в производство", "success")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -346,6 +350,7 @@ def order_finish(order_id):
     conn = get_db()
     try:
         finish_order(conn, order_id)
+        flash(f"Поръчка №{order_id} е готова, продуктите са в склада", "success")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -360,6 +365,7 @@ def order_cancel(order_id):
     conn = get_db()
     try:
         cancel_order(conn, order_id)
+        flash(f"Поръчка №{order_id} е отказана", "removed")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -412,6 +418,7 @@ def product_price(product_id):
     conn = get_db()
     with conn:
         conn.execute("UPDATE products SET sale_price = ? WHERE id = ?", (price, product_id))
+    flash(f"Новата цена е {price:.2f} €", "success")
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
 @app.route("/products/<int:product_id>/import", methods=["POST"])
@@ -434,7 +441,7 @@ def product_import(product_id):
         message = f"Рецептата е заредена. Редове в нея: {count}."
         if created:
             message += " Нови компоненти в склада (с количество 0): " + ", ".join(created)
-        flash(message)
+        flash(message, "success")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -461,6 +468,7 @@ def product_hours(product_id):
                ON CONFLICT (product_id, process_id) DO UPDATE SET hours = excluded.hours""",
             (product_id, process_id, hours),
         )
+    flash("Времето за процеса е записано", "success")
     conn.close()
     return redirect(url_for("product_detail", product_id=product_id))
 @app.route("/sales", methods=["GET", "POST"])
@@ -481,6 +489,7 @@ def sales():
                 "INSERT INTO sales (customer, product_id, quantity) VALUES (?, ?, ?)",
                 (customer, product_id, quantity),
             )
+        flash(f"Продажбата за „{customer}“ е създадена", "success")
         conn.close()
         return redirect(url_for("sales"))
     rows = conn.execute("""
@@ -500,6 +509,7 @@ def sale_ship(sale_id):
     conn = get_db()
     try:
         ship_sale(conn, sale_id)
+        flash(f"Продажба №{sale_id} е изпратена", "success")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -514,6 +524,7 @@ def sale_cancel(sale_id):
     conn = get_db()
     try:
         cancel_sale(conn, sale_id)
+        flash(f"Продажба №{sale_id} е отказана", "removed")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -526,7 +537,7 @@ def component_remove(component_id):
     conn = get_db()
     try:
         remove_component(conn, component_id)
-        flash("Компонентът е премахнат")
+        flash("Компонентът е премахнат", "removed")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -539,7 +550,7 @@ def product_remove(product_id):
     conn = get_db()
     try:
         remove_product(conn, product_id)
-        flash("Продуктът е премахнат")
+        flash("Продуктът е премахнат", "removed")
     except ValueError as e:
         flash(str(e))
     conn.close()
@@ -561,7 +572,7 @@ def processes_page():
                 raise ValueError("Няма такъв процес")
             with conn:
                 conn.execute("UPDATE processes SET hourly_rate = ? WHERE id = ?", (rate, process_id))
-            flash(f"Ставката за „{process['name']}“ вече е {rate:.2f} €/ч")
+            flash(f"Ставката за „{process['name']}“ вече е {rate:.2f} €/ч", "success")
         except ValueError as e:
             flash(str(e))
         conn.close()

@@ -3,9 +3,7 @@
 {% block content %}
     <h1>Процеси и часови ставки</h1>
     <p><button type="button" onclick="document.getElementById('edit-rate').showModal()">Смени ставка</button></p>
-    {% for msg in get_flashed_messages() %}
-        <p class="error">{{ msg }}</p>
-    {% endfor %}
+
 
     <dialog id="edit-rate">
         <h2>Смяна на часовата ставка</h2>

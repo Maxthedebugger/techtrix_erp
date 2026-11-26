@@ -10,9 +10,7 @@
         <button type="button" onclick="document.getElementById('edit-process').showModal()">Промяна на процесите</button>
         {% endif %}
     </p>
-    {% for msg in get_flashed_messages() %}
-        <p class="error">{{ msg }}</p>
-    {% endfor %}
+
 
     {% if session.role == "director" %}
     <dialog id="edit-bom">

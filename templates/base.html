@@ -66,6 +66,19 @@
         {% endif %}
     </span>
 </header>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="toasts">
+    {% for category, msg in messages %}
+    <div class="toast toast-{{ category }}">
+        <span>{% if category == "success" %}✓{% elif category == "removed" %}🗑{% else %}⚠{% endif %}</span>
+        <span>{{ msg }}</span>
+        <button type="button" class="toast-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
 <main>
     {% block content %}{% endblock %}
 </main>
@@ -84,6 +97,15 @@
     });
 </script>
  
-</body>
+
+<script>
+    // Зелените и червените съобщения изчезват сами след 5 секунди. Грешките остават, докато не натиснеш ×
+    setTimeout(function () {
+        document.querySelectorAll(".toast-success, .toast-removed").forEach(function (t) {
+            t.classList.add("toast-hide");
+            setTimeout(function () { t.remove(); }, 400);
+        });
+    }, 5000);
+</script></body>
 </html>
  

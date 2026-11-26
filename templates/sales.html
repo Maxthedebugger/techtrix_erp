@@ -2,9 +2,7 @@
 {% block title %}Продажби · Techtrix ERP{% endblock %}
 {% block content %}
     <h1>Продажби</h1>
-    {% for msg in get_flashed_messages() %}
-        <p class="error">{{ msg }}</p>
-    {% endfor %}
+
 
     {% if session.role == "director" %}
     <h2>Нова продажба</h2>

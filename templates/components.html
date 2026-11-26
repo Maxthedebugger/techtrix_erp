@@ -2,9 +2,7 @@
 {% block title %}Склад · Techtrix ERP{% endblock %}
 {% block content %}
     <h1>Склад: компоненти</h1>
-    {% for msg in get_flashed_messages() %}
-        <p class="error">{{ msg }}</p>
-    {% endfor %}
+
     <p>
         <button type="button" onclick="document.getElementById('new-component').showModal()">+ Нов компонент</button>
         <button type="button" onclick="document.getElementById('new-delivery').showModal()">+ Нова доставка</button>

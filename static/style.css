@@ -418,4 +418,44 @@ header {
     flex-wrap: wrap;
     row-gap: 8px;
 }
- 
+/* --- Съобщения горе (toast) --- */
+.toasts {
+    position: fixed;               /* стои на едно място, дори когато скролваш */
+    top: 100px;                    /* под менюто */
+    left: 50%;
+    transform: translateX(-50%);   /* точно в средата */
+    z-index: 30;
+    display: grid;
+    gap: 8px;
+    width: min(560px, 90vw);
+}
+.toast {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    transition: opacity 0.4s, transform 0.4s;
+}
+.toast span:nth-child(2) {
+    flex: 1;                       /* текстът заема мястото, × остава вдясно */
+}
+.toast-success { background: var(--green-bg); color: var(--green-ink); border: 1px solid var(--green-ink); }
+.toast-removed { background: var(--red-bg); color: var(--red-ink); border: 1px solid var(--red); }
+.toast-message { background: #fff4e5; color: #8a4b00; border: 1px solid #e0a040; }   /* грешки: оранжево */
+[data-theme="dark"] .toast-message { background: #3a2a12; color: #f5c27a; }
+.toast-hide {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+main .toast-close,
+.toast-close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    padding: 0 4px;
+    cursor: pointer;
+}

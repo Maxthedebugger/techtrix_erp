@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash
 
-ROLES = {"director": "Директор", "warehouse": "Складовник", "production": "Производство"}
+ROLES = {"director": "Директор", "warehouse": "Началник склад", "production": "Производство"}
 
 
 def check_new_password(password, password2):

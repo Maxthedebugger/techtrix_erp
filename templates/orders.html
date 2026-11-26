@@ -4,11 +4,7 @@
     
 <h1>Поръчки за производство</h1>
     
-{% for msg in get_flashed_messages() %}
-        
-<p class="error">{{ msg }}</p>
-    
-{% endfor %}
+
     
 {% if session.role == "director" %}
     <p><button type="button" onclick="document.getElementById('new-order').showModal()">+ Нова поръчка</button></p>
