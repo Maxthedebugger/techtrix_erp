@@ -1,7 +1,121 @@
 {% extends "base.html" %}
 {% block content %}
-    
+{% set role = session.role %}
+{% set reasons = {"delivery": "Доставка", "production": "Производство", "correction": "Корекция", "shipment": "Изпращане"} %}
+ 
 <h1>Добре дошли, {{ session.username }}!</h1>
-    
-<p>Вашата роля е: {{ session.role }}</p>
+ 
+<div class="tiles">
+    {% if role in ["director", "warehouse"] %}
+    <div class="tile {% if d.low %}tile-warn{% endif %}">
+        <small>Под минимума</small>
+        <strong>{{ d.low|length }}</strong>
+        <p>{% for c in d.low %}{{ c.part_number }} ({{ c.quantity }} / {{ c.min_quantity }}){% if not loop.last %}, {% endif %}{% else %}Всичко е наред{% endfor %}</p>
+    </div>
+    <div class="tile {% if d.soon %}tile-warn{% endif %}">
+        <small>AI: ще свършат до 7 дни</small>
+        <strong>{{ d.soon|length }}</strong>
+        <p>{% for c in d.soon %}{{ c.part_number }} ({{ c.days }} дни){% if not loop.last %}, {% endif %}{% else %}Няма{% endfor %}</p>
+    </div>
+    {% endif %}
+ 
+    {% if role in ["director", "production"] %}
+    <div class="tile">
+        <small>Поръчки за производство</small>
+        <strong>{{ d.orders.new }} · {{ d.orders.in_production }} · {{ d.orders.done }}</strong>
+        <p>нови · в производство · готови</p>
+    </div>
+    {% endif %}
+ 
+    {% if role == "director" %}
+    <div class="tile">
+        <small>Продажби този месец</small>
+        <strong>{{ "%.2f"|format(d.month_revenue) }} €</strong>
+        <p>{{ d.month_sales }} изпратени продажби</p>
+    </div>
+    {% endif %}
+ 
+    {% if role in ["director", "production"] %}
+    <div class="tile">
+        <small>Можем да произведем</small>
+        <strong>{% for p in d.can_make %}{{ p.n }}{% if not loop.last %} · {% endif %}{% endfor %}</strong>
+        <p>{% for p in d.can_make %}{{ p.code }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+    </div>
+    {% endif %}
+ 
+    {% if role in ["director", "warehouse"] %}
+    <div class="tile">
+        <small>Стойност на склада</small>
+        <strong>{{ "%.2f"|format(d.stock_value) }} €</strong>
+        <p>всички компоненти × цена</p>
+    </div>
+    {% endif %}
+</div>
+ 
+<div class="dash-grid">
+    {% if role in ["director", "warehouse"] %}
+    <section>
+        <h2>Последните 10 движения</h2>
+        <table>
+            <tr><th>Дата</th><th>Код</th><th>Вид</th><th>Промяна</th><th>Причина</th></tr>
+            {% for m in d.last_moves %}
+            <tr>
+                <td>{{ m.created_at[:16] }}</td>
+                <td>{{ m.code }}</td>
+                <td>{{ m.kind }}</td>
+                <td>{% if m.change > 0 %}+{% endif %}{{ m.change }}</td>
+                <td>{{ reasons.get(m.reason, m.reason) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">Още няма движения</td></tr>
+            {% endfor %}
+        </table>
+    </section>
+ 
+    <section>
+        <h2>Чакащи продажби</h2>
+        <table>
+            <tr><th>№</th><th>Клиент</th><th>Продукт</th><th>Брой</th><th>На склад</th></tr>
+            {% for s in d.pending %}
+            <tr {% if s.in_stock < s.quantity %}class="low"{% endif %}>
+                <td>{{ s.id }}</td>
+                <td>{{ s.customer }}</td>
+                <td>{{ s.code }}</td>
+                <td>{{ s.quantity }}</td>
+                <td>{{ s.in_stock }}{% if s.in_stock < s.quantity %} (не стига){% endif %}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5">Няма чакащи продажби</td></tr>
+            {% endfor %}
+        </table>
+    </section>
+    {% endif %}
+ 
+    {% if role == "director" %}
+    <section>
+        <h2>Най-продавани този месец</h2>
+        <table>
+            <tr><th>Място</th><th>Продукт</th><th>Продадени</th></tr>
+            {% for t in d.top %}
+            <tr><td>{{ loop.index }}</td><td>{{ t.code }} · {{ t.name }}</td><td>{{ t.sold }}</td></tr>
+            {% else %}
+            <tr><td colspan="3">Този месец още няма продажби</td></tr>
+            {% endfor %}
+        </table>
+    </section>
+ 
+    <section>
+        <h2>Без продажба последните 30 дни</h2>
+        <table>
+            <tr><th>Продукт</th><th>Последна продажба</th></tr>
+            {% for p in d.no_sales %}
+            <tr><td>{{ p.code }} · {{ p.name }}</td><td>{{ p.last_sale[:10] if p.last_sale else "никога" }}</td></tr>
+            {% else %}
+            <tr><td colspan="2">Всички продукти се продават</td></tr>
+            {% endfor %}
+        </table>
+    </section>
+    {% endif %}
+</div>
 {% endblock %}
+ 
