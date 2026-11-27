@@ -4,22 +4,29 @@
     <h1>Продажби</h1>
 
 
+ 
     {% if session.role == "director" %}
-    <h2>Нова продажба</h2>
-    <form method="post">
-        <p>Клиент: <input type="text" name="customer" required></p>
-        <p>
-            Продукт:
-            <select name="product_id">
-                {% for p in products %}
-                <option value="{{ p.id }}">{{ p.code }} · {{ p.name }} (на склад {{ p.quantity }})</option>
-                {% endfor %}
-            </select>
-        </p>
-        <p>Брой: <input type="number" name="quantity" min="1" required></p>
-        <button type="submit">Създай продажба</button>
-    </form>
+    <p><button type="button" onclick="document.getElementById('new-sale').showModal()">+ Нова продажба</button></p>
+ 
+    <dialog id="new-sale">
+        <h2>Нова продажба</h2>
+        <form method="post">
+            <p>Клиент: <input type="text" name="customer" required></p>
+            <p>
+                Продукт:
+                <select name="product_id">
+                    {% for p in products %}
+                    <option value="{{ p.id }}">{{ p.code }} · {{ p.name }} (на склад {{ p.quantity }})</option>
+                    {% endfor %}
+                </select>
+            </p>
+            <p>Брой: <input type="number" name="quantity" min="1" required></p>
+            <button type="submit">Създай продажба</button>
+            <button type="button" onclick="document.getElementById('new-sale').close()">Отказ</button>
+        </form>
+    </dialog>
     {% endif %}
+ 
 
     <h2>Всички продажби</h2>
     <table>
