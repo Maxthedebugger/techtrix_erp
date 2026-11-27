@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Настройки · {{ company_name }}{% endblock %}
+{% block content %}
+<h1>Администрация: настройки</h1>
+
+<h2>Име на фирмата</h2>
+<form method="post" class="form-grid" style="max-width: 520px">
+    <label>Име:</label> <input type="text" name="company_name" value="{{ name }}" maxlength="40" required>
+    <span></span> <button type="submit">Запази</button>
+</form>
+<p class="hint">Това име се показва горе вляво в менюто и в заглавието на раздела в браузъра.</p>
+{% endblock %}

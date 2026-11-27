@@ -2,7 +2,7 @@
 <html lang="bg">
 <head>
 <meta charset="utf-8">
-<title>{% block title %}Techtrix ERP{% endblock %}</title>
+<title>{% block title %}{{ company_name }}{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <script>
     // Ако преди е избрана тъмна тема, включи я веднага (преди да се покаже страницата)
@@ -44,7 +44,7 @@
 </head>
 <body>
 <header>
-    <strong>Techtrix ERP</strong>
+    <strong>{{ company_name }}</strong>
     {% if session.username %}
     <nav>
         <a href="{{ url_for('index') }}">Начало</a>
@@ -81,6 +81,7 @@
             <span class="dropdown-menu">
                 <a href="{{ url_for('admin_users') }}">Потребители</a>
                 <a href="{{ url_for('admin_activity') }}">Лог на активността</a>
+                <a href="{{ url_for('admin_settings') }}">Настройки</a>
             </span>
         </span>
         {% endif %}

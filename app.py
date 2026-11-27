@@ -10,12 +10,20 @@ from services.sales import ship_sale, cancel_sale
 from services.products import add_product, remove_product
 from services.dashboard import get_dashboard
 from services.users import ROLES, create_user, set_password, set_role, delete_user, bg_time
- 
+from services.settings import get_company_name, set_company_name
 
 app = Flask(__name__)
 
 app.secret_key = "techtrix-dev-key-2026"
 app.add_template_filter(bg_time, "bg_time")
+
+@app.context_processor
+def inject_company_name():
+    """Подава името на фирмата на ВСИЧКИ шаблони, за да го показва base.html."""
+    conn = get_db()
+    name = get_company_name(conn)
+    conn.close()
+    return {"company_name": name}
 def require_role(*roles):
     if "username" not in session:
         return redirect(url_for("login"))
@@ -694,5 +702,22 @@ def admin_activity():
     ).fetchall()
     conn.close()
     return render_template("admin_activity.html", online=online, log=log)
+@app.route("/admin/settings", methods=["GET", "POST"])
+def admin_settings():
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    if request.method == "POST":
+        try:
+            name = set_company_name(conn, request.form["company_name"])
+            flash(f"Името на фирмата вече е „{name}“", "success")
+        except ValueError as e:
+            flash(str(e))
+        conn.close()
+        return redirect(url_for("admin_settings"))
+    name = get_company_name(conn)
+    conn.close()
+    return render_template("admin_settings.html", name=name)
 if __name__ == "__main__":
     app.run(debug=True)
