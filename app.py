@@ -10,8 +10,8 @@ from services.sales import ship_sale, cancel_sale
 from services.products import add_product, remove_product
 from services.dashboard import get_dashboard
 from services.users import ROLES, create_user, set_password, set_role, delete_user, bg_time
- 
 
+ 
 app = Flask(__name__)
 
 app.secret_key = "techtrix-dev-key-2026"
@@ -642,7 +642,21 @@ def admin_user_role(user_id):
     conn = get_db()
     try:
         role = request.form["role"]
-        name = set_role(conn, user_id, role)
+@app.route("/admin/users/<int:user_id>/delete", methods=["POST"])
+def admin_user_delete(user_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        name = delete_user(conn, user_id, session["username"])
+        flash(f"Потребителят „{name}“ е изтрит", "removed")
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("admin_users"))
+ 
+     name = set_role(conn, user_id, role)
         flash(f"„{name}“ вече е {ROLES[role]}", "success")
         if name == session["username"]:
             session["role"] = role
