@@ -30,7 +30,8 @@
 </dialog>
 
 <table>
-    <tr><th>№</th><th>Потребител</th><th>Роля</th><th>Последен вход</th><th>Смяна на ролята</th><th>Парола</th></tr>
+    <tr><th>№</th><th>Потребител</th><th>Роля</th><th>Последен вход</th><th>Смяна на ролята</th><th>Парола</th><th>Изтриване</th></tr>
+ 
     {% for u in users %}
     <tr>
         <td>{{ u.id }}</td>
@@ -62,6 +63,15 @@
                 </form>
             </dialog>
         </td>
+        <td>
+            {% if u.username != session.username %}
+            <form method="post" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                  onsubmit="return confirm('Наистина ли да изтрия потребителя „{{ u.username }}“? Това не може да се върне.')">
+                <button type="submit">Изтрий</button>
+            </form>
+            {% endif %}
+        </td>
+ 
     </tr>
     {% endfor %}
 </table>
