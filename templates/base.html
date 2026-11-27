@@ -26,7 +26,7 @@
 <header>
     <strong>Techtrix ERP</strong>
     {% if session.username %}
-    <nav>
+        <nav>
         <a href="{{ url_for('index') }}">Начало</a>
         {% if session.role in ["director", "warehouse"] %}
         <a href="{{ url_for('components') }}">Склад</a>
@@ -37,16 +37,25 @@
                 <a href="{{ url_for('movements', view='products') }}">Продукти</a>
             </span>
         </span>
+        {% endif %}
+        <span class="dropdown">
+            <a href="{{ url_for('orders') }}">Производство ▾</a>
+            <span class="dropdown-menu">
+                <a href="{{ url_for('orders') }}">Поръчки</a>
+                {% if session.role == "director" %}
+                <a href="{{ url_for('processes_page') }}">Процеси</a>
+                {% endif %}
+            </span>
+        </span>
+        {% if session.role in ["director", "warehouse"] %}
         <a href="{{ url_for('forecast') }}">AI прогноза</a>
         {% endif %}
         <a href="{{ url_for('products') }}">Продукти</a>
-        <a href="{{ url_for('orders') }}">Производство</a>
         {% if session.role in ["director", "warehouse"] %}
         <a href="{{ url_for('sales') }}">Продажби</a>
         {% endif %}
         {% if session.role == "director" %}
         <a href="{{ url_for('report') }}">Отчет</a>
-        <a href="{{ url_for('processes_page') }}">Процеси</a>
         <span class="dropdown">
             <a href="{{ url_for('admin_users') }}">Администрация ▾</a>
             <span class="dropdown-menu">
@@ -56,6 +65,7 @@
         </span>
         {% endif %}
     </nav>
+ 
     {% endif %}
     <span>
         <button type="button" class="theme-btn" onclick="toggleTheme()" title="Светла / тъмна тема">🌙</button>
