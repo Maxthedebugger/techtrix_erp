@@ -71,8 +71,8 @@
                 <a href="{{ url_for('admin_users') }}">Потребители</a>
                 <a href="{{ url_for('admin_activity') }}">Лог на активността</a>
             </span>
-        </span>
-        {% endif %}
+        <a class="head-btn" href="{{ url_for('change_password') }}">Смени паролата</a>
+        <a class="head-btn head-btn-exit" href="{{ url_for('logout') }}">Изход</a>
     </nav>
  
     {% endif %}

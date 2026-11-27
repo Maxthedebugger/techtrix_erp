@@ -469,4 +469,25 @@ form[action*="delete"] button:hover {
     background: var(--red);
     color: white;
 }
- 
+/* --- Бутони „Смени паролата“ и „Изход“ в горното меню --- */
+header > span {
+    display: flex;
+    align-items: center;
+    gap: 8px;                      /* разстояние между бутоните */
+}
+header .head-btn {
+    padding: 4px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;         /* без подчертаване */
+    font-weight: 500;
+}
+header .head-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+header .head-btn-exit:hover {
+    background: var(--red);        /* „Изход“ светва в червено */
+    border-color: var(--red);
+}
+
