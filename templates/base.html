@@ -9,7 +9,7 @@
     if (localStorage.getItem("theme") === "dark") {
         document.documentElement.dataset.theme = "dark";
     }
-    // Сменя темата при натискане на бутона 🌙 / ☀️
+    // Сменя темата (бутонът е в менюто на зъбното колело)
     function toggleTheme() {
         const html = document.documentElement;
         if (html.dataset.theme === "dark") {
@@ -19,7 +19,27 @@
             html.dataset.theme = "dark";
             localStorage.setItem("theme", "dark");
         }
+        updateThemeLabel();
     }
+    // Показва или скрива менюто под зъбното колело
+    function toggleSettings() {
+        document.getElementById("settings-menu").classList.toggle("open");
+    }
+    // Клик където и да е извън менюто го затваря
+    document.addEventListener("click", function (event) {
+        const menu = document.getElementById("settings-menu");
+        if (menu && !event.target.closest(".settings")) {
+            menu.classList.remove("open");
+        }
+    });
+    // Надписът на бутона показва към коя тема ще превключим
+    function updateThemeLabel() {
+        const label = document.getElementById("theme-label");
+        if (label) {
+            label.textContent = document.documentElement.dataset.theme === "dark" ? "Светла тема" : "Тъмна тема";
+        }
+    }
+    document.addEventListener("DOMContentLoaded", updateThemeLabel);
 </script>
 </head>
 <body>
@@ -67,12 +87,26 @@
     </nav>
     {% endif %}
     <span>
-        <button type="button" class="theme-btn" onclick="toggleTheme()" title="Светла / тъмна тема">🌙</button>
         {% if session.username %}
         {{ session.username }} ({{ session.role }})
-        <a class="head-btn" href="{{ url_for('change_password') }}">Смени паролата</a>
-        <a class="head-btn head-btn-exit" href="{{ url_for('logout') }}">Изход</a>
         {% endif %}
+        <span class="settings">
+            <button type="button" class="gear-btn" onclick="toggleSettings()" title="Настройки">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+            <span class="settings-menu" id="settings-menu">
+                {% if session.username %}
+                <a href="{{ url_for('change_password') }}">Смени паролата</a>
+                {% endif %}
+                <button type="button" onclick="toggleTheme()" id="theme-label">Тъмна тема</button>
+                {% if session.username %}
+                <a href="{{ url_for('logout') }}" class="settings-exit">Изход</a>
+                {% endif %}
+            </span>
+        </span>
     </span>
 </header>
 {% with messages = get_flashed_messages(with_categories=true) %}
