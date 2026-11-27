@@ -26,7 +26,7 @@
 <header>
     <strong>Techtrix ERP</strong>
     {% if session.username %}
-        <nav>
+    <nav>
         <a href="{{ url_for('index') }}">Начало</a>
         {% if session.role in ["director", "warehouse"] %}
         <a href="{{ url_for('components') }}">Склад</a>
@@ -56,6 +56,15 @@
         {% endif %}
         {% if session.role == "director" %}
         <a href="{{ url_for('report') }}">Отчет</a>
+        <span class="dropdown">
+            <a href="{{ url_for('admin_users') }}">Администрация ▾</a>
+            <span class="dropdown-menu">
+                <a href="{{ url_for('admin_users') }}">Потребители</a>
+                <a href="{{ url_for('admin_activity') }}">Лог на активността</a>
+            </span>
+        </span>
+        {% endif %}
+    </nav>
         <span class="dropdown">
             <a href="{{ url_for('admin_users') }}">Администрация ▾</a>
             <span class="dropdown-menu">
