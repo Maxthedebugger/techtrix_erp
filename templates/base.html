@@ -65,23 +65,13 @@
         </span>
         {% endif %}
     </nav>
-        <span class="dropdown">
-            <a href="{{ url_for('admin_users') }}">Администрация ▾</a>
-            <span class="dropdown-menu">
-                <a href="{{ url_for('admin_users') }}">Потребители</a>
-                <a href="{{ url_for('admin_activity') }}">Лог на активността</a>
-            </span>
-        <a class="head-btn" href="{{ url_for('change_password') }}">Смени паролата</a>
-        <a class="head-btn head-btn-exit" href="{{ url_for('logout') }}">Изход</a>
-    </nav>
- 
     {% endif %}
     <span>
         <button type="button" class="theme-btn" onclick="toggleTheme()" title="Светла / тъмна тема">🌙</button>
         {% if session.username %}
         {{ session.username }} ({{ session.role }})
-        · <a href="{{ url_for('change_password') }}">Смени паролата</a>
-        · <a href="{{ url_for('logout') }}">Изход</a>
+        <a class="head-btn" href="{{ url_for('change_password') }}">Смени паролата</a>
+        <a class="head-btn head-btn-exit" href="{{ url_for('logout') }}">Изход</a>
         {% endif %}
     </span>
 </header>
