@@ -9,7 +9,8 @@ from services.forecast import forecast_component
 from services.sales import ship_sale, cancel_sale
 from services.products import add_product, remove_product
 from services.dashboard import get_dashboard
-from services.users import ROLES, create_user, set_password, set_role, bg_time
+from services.users import ROLES, create_user, set_password, set_role, delete_user, bg_time
+ 
 
 app = Flask(__name__)
 
@@ -59,12 +60,21 @@ def login():
 def update_last_seen():
     if "log_id" in session and request.endpoint != "static":
         conn = get_db()
+        user = conn.execute(
+            "SELECT role FROM users WHERE username = ?", (session["username"],)
+        ).fetchone()
+        if user is None:
+            conn.close()
+            session.clear()
+            return redirect(url_for("login"))
+        session["role"] = user["role"]
         with conn:
             conn.execute(
                 "UPDATE login_log SET last_seen = CURRENT_TIMESTAMP WHERE id = ?",
                 (session["log_id"],)
             )
         conn.close()
+ 
 @app.route("/logout")
 def logout():
     if "log_id" in session:
@@ -642,6 +652,20 @@ def admin_user_role(user_id):
     if session["role"] != "director":
         return redirect(url_for("index"))
     return redirect(url_for("admin_users"))
+@app.route("/admin/users/<int:user_id>/delete", methods=["POST"])
+def admin_user_delete(user_id):
+    denied = require_role("director")
+    if denied:
+        return denied
+    conn = get_db()
+    try:
+        name = delete_user(conn, user_id, session["username"])
+        flash(f"Потребителят „{name}“ е изтрит", "removed")
+    except ValueError as e:
+        flash(str(e))
+    conn.close()
+    return redirect(url_for("admin_users"))
+ 
 @app.route("/admin/activity")
 def admin_activity():
     denied = require_role("director")
