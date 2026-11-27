@@ -55,6 +55,21 @@ def set_role(conn, user_id, role):
         conn.execute("UPDATE users SET role = ? WHERE id = ?", (role, user_id))
     return user["username"]
 
+def delete_user(conn, user_id, current_username):
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if user is None:
+        raise ValueError("Няма такъв потребител")
+    if user["username"] == current_username:
+        raise ValueError("Не можете да изтриете себе си")
+    if user["role"] == "director":
+        directors = conn.execute("SELECT COUNT(*) FROM users WHERE role = 'director'").fetchone()[0]
+        if directors <= 1:
+            raise ValueError("Това е последният директор и не може да бъде изтрит")
+    with conn:
+        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    return user["username"]
+ 
+
 
 def _last_sunday(year, month):
     # последната неделя на месеца (тогава се мести часът)
