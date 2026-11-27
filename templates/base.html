@@ -103,7 +103,7 @@
                 {% endif %}
                 <button type="button" onclick="toggleTheme()" id="theme-label">Тъмна тема</button>
                 {% if session.username %}
-                <a href="{{ url_for('logout') }}" class="settings-exit">Изход</a>
+                <a href="{{ url_for('logout') }}" class="settings-exit" onclick="return confirm('Сигурни ли сте, че искате да излезете от профила си?')">Изход</a>
                 {% endif %}
             </span>
         </span>
