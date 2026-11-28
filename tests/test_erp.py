@@ -71,3 +71,18 @@ def test_forecast_finds_daily_usage(conn):
             )
     f = forecast_component(conn, 4)
     assert round(f["per_day"]) == 5
+    f = forecast_component(conn, 4)
+    assert round(f["per_day"]) == 5
+
+def test_delivery_many(conn):
+    from services.inventory import receive_delivery_many
+    before = conn.execute("SELECT quantity FROM components WHERE part_number = 'C-100N'").fetchone()[0]
+    n = receive_delivery_many(conn, [("c-100n", 100, 0.03), ("PCB-ETH1", 5, 3.0)])
+    assert n == 2
+    after = conn.execute("SELECT quantity FROM components WHERE part_number = 'C-100N'").fetchone()[0]
+    assert after == before + 100
+    # грешен код: нищо не се записва
+    with pytest.raises(ValueError):
+        receive_delivery_many(conn, [("C-100N", 1, 0.03), ("NOPE", 1, 1.0)])
+    again = conn.execute("SELECT quantity FROM components WHERE part_number = 'C-100N'").fetchone()[0]
+    assert again == after

@@ -550,3 +550,54 @@ header .brand:hover {
 @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }   /* без движение, ако човек го е изключил */
 }
+
+/* --- Нова доставка с много редове и подсказки --- */
+.wide-dialog {
+    width: min(760px, 92vw);          /* по-широк прозорец, но не по-широк от екрана */
+    overflow: visible;                /* предложенията могат да излязат под прозореца */
+}
+.delivery-table {
+    overflow: visible;                /* иначе таблицата отрязва предложенията */
+}
+.delivery-table input {
+    width: 100%;
+    box-sizing: border-box;
+}
+.delivery-table td {
+    vertical-align: top;
+}
+.code-cell {
+    position: relative;               /* предложенията се подреждат спрямо клетката */
+    width: 45%;
+}
+.suggestions {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    z-index: 40;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    max-height: 220px;
+    overflow-y: auto;
+}
+.suggestions:empty {
+    display: none;                    /* празна кутийка не се вижда */
+}
+.suggestion {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.suggestion:hover {
+    background: var(--head);
+}
+.suggestion.none {
+    color: var(--soft);
+    cursor: default;
+}
+dialog .row-remove {
+    padding: 4px 10px;
+    color: var(--red);
+}

@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from database import get_db
-from services.inventory import receive_delivery, correct_stock, add_component, remove_component
+from services.inventory import receive_delivery, receive_delivery_many, correct_stock, add_component, remove_component
 from services.costing import calc_cost
 from services.recipes import set_bom_item, import_bom
 from services.production import start_production, finish_order, cancel_order
@@ -120,23 +120,47 @@ def components():
     used_in = {u["component_id"]: u["codes"] for u in used}
     conn.close()
     return render_template("components.html", components=rows, used_in=used_in)
-@app.route("/delivery", methods=["GET", "POST"])
+@app.route("/delivery", methods=["POST"])
 def delivery():
     denied = require_role("director", "warehouse")
     if denied:
         return denied
+    codes = request.form.getlist("part_number")
+    qtys = request.form.getlist("qty")
+    prices = request.form.getlist("unit_price")
+    items = []
+    for code, qty, price in zip(codes, qtys, prices):
+        if code.strip() == "":
+            continue                       # празен ред: пропускаме го
+        items.append((code, int(qty), float(price)))
     conn = get_db()
-    if request.method == "POST":
-        component_id = int(request.form["component_id"])
-        qty = int(request.form["qty"])
-        unit_price = float(request.form["unit_price"])
-        receive_delivery(conn, component_id, qty, unit_price)
-        flash(f"Доставката е заприходена: +{qty} бр.", "success")
-        conn.close()
-        return redirect(url_for("components"))
-    rows = conn.execute("SELECT id, part_number, name FROM components WHERE active = 1 ORDER BY part_number").fetchall()
+    try:
+        n = receive_delivery_many(conn, items)
+        flash(f"Доставката е заприходена: {n} компонента", "success")
+    except ValueError as e:
+        flash(str(e))
     conn.close()
-    return render_template("delivery.html", components=rows)
+    return redirect(url_for("components"))
+
+
+@app.route("/api/components/search")
+def component_search():
+    denied = require_role("director", "warehouse")
+    if denied:
+        return denied
+    q = request.args.get("q", "").strip()
+    if len(q) < 3:
+        return jsonify([])                 # под 3 букви не търсим
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT part_number, name, quantity FROM components
+           WHERE active = 1 AND (part_number LIKE ? OR name LIKE ?)
+           ORDER BY part_number
+           LIMIT 10""",
+        (q + "%", "%" + q + "%"),
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
 @app.route("/movements")
 def movements():
     denied = require_role("director", "warehouse")
