@@ -149,15 +149,15 @@ def component_search():
     if denied:
         return denied
     q = request.args.get("q", "").strip()
-    if len(q) < 3:
-        return jsonify([])                 # под 3 букви не търсим
+    if len(q) < 1:
+        return jsonify([])                 # празно поле: не търсим
     conn = get_db()
     rows = conn.execute(
         """SELECT part_number, name, quantity FROM components
            WHERE active = 1 AND (part_number LIKE ? OR name LIKE ?)
-           ORDER BY part_number
+           ORDER BY part_number LIKE ? DESC, part_number
            LIMIT 10""",
-        (q + "%", "%" + q + "%"),
+        (q + "%", "%" + q + "%", q + "%"),
     ).fetchall()
     conn.close()
     return jsonify([dict(r) for r in rows])

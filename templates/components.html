@@ -24,7 +24,7 @@
 
     <dialog id="new-delivery" class="wide-dialog">
         <h2>Нова доставка</h2>
-        <p class="hint">Пишете кода на компонента: след 3 букви излизат предложения. Редовете са неограничени.</p>
+        <p class="hint">Пишете кода на компонента: след първата буква излизат предложения. Редовете са неограничени.</p>
         <form method="post" action="{{ url_for('delivery') }}" autocomplete="off">
             <table class="delivery-table">
                 <thead>
@@ -64,11 +64,11 @@
                 button.closest("tr").remove();
             }
         }
-        // Търси в базата, докато пишеш (от 3-тата буква нататък)
+        // Търси в базата, докато пишеш (още от първата буква)
         async function searchComponents(input) {
             const box = input.nextElementSibling;          // кутийката с предложенията под полето
             const q = input.value.trim();
-            if (q.length < 3) {
+            if (q.length < 1) {
                 box.innerHTML = "";
                 return;
             }
