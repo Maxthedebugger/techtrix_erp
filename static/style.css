@@ -537,3 +537,16 @@ header .brand:hover {
     text-decoration: underline;    /* подчертава се при посочване */
 }
 
+/* --- Плавно появяване при скрол --- */
+.reveal {
+    opacity: 0;                       /* невидим */
+    transform: translateY(20px);      /* малко по-надолу */
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+    opacity: 1;                       /* видим */
+    transform: none;                  /* на мястото си */
+}
+@media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }   /* без движение, ако човек го е изключил */
+}

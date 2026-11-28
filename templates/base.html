@@ -147,6 +147,22 @@
         lastY = y;
     });
 </script>
+<script>
+    // Плавно появяване: редовете в таблиците и картите изплуват, когато стигнат до екрана при скрол
+    const revealItems = document.querySelectorAll("main table tr, main .tile");
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");  // вече се вижда → покажи плавно
+                observer.unobserve(entry.target);       // показва се само веднъж
+            }
+        });
+    }, { threshold: 0.1 });                              // 10 % от елемента е на екрана
+    revealItems.forEach(function (item) {
+        item.classList.add("reveal");                    // скрий го (прозрачен и малко по-надолу)
+        observer.observe(item);                          // и следи кога ще влезе в екрана
+    });
+</script>
  
 
 <script>
