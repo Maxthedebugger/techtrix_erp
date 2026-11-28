@@ -44,10 +44,9 @@
 </head>
 <body>
 <header>
-    <strong>{{ company_name }}</strong>
+    <a href="{{ url_for('index') }}" class="brand" title="Към началото">{{ company_name }}</a>
     {% if session.username %}
     <nav>
-        <a href="{{ url_for('index') }}">Начало</a>
         {% if session.role in ["director", "warehouse"] %}
         <span class="dropdown">
             <a href="{{ url_for('components') }}">Склад ▾</a>

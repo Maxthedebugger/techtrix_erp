@@ -526,3 +526,14 @@ header .settings-menu .settings-exit {
     color: var(--red);             /* „Изход“ е червен */
     border-top: 1px solid var(--line);
 }
+
+/* --- Името на фирмата горе вляво води към началото --- */
+header .brand {
+    font-weight: 700;
+    color: white;
+    text-decoration: none;         /* без подчертаване */
+}
+header .brand:hover {
+    text-decoration: underline;    /* подчертава се при посочване */
+}
+
